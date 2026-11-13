@@ -69,6 +69,19 @@ Example MCP client configuration (replace the binary path and root with paths on
 
 Different MCP hosts may use different configuration formats. This snippet illustrates the command and argument boundary, not a universal configuration schema.
 
+### Connecting Dirhaven to ChatGPT
+
+**Additional setup is required.** Dirhaven provides the local MCP server, but **does not provide or manage OpenAI Secure MCP Tunnels, ChatGPT plugins, accounts, credentials, or workspace permissions**.
+
+Unlike MCP clients that can launch a local `stdio` server directly, ChatGPT cannot directly launch Dirhaven on your computer. For the current local `stdio` version, you must independently set up an OpenAI-supported connection to your local server (such as **Secure MCP Tunnel**) and configure the corresponding **custom MCP plugin** in ChatGPT, subject to your account and workspace permissions.
+
+**Dirhaven does not configure or install these OpenAI components.** Their availability, setup and naming may change independently of this project. Always follow OpenAI's current official documentation rather than relying on instructions copied into this repository:
+
+- [Connecting custom MCP servers in ChatGPT](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt)
+- [Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
+
+This setup is **specific to ChatGPT**, not a universal requirement for using Dirhaven with other MCP clients. Only grant access to folders you intend to share with the connected AI client.
+
 ### Optional local metrics
 
 ```sh

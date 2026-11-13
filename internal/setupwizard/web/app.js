@@ -136,3 +136,32 @@ for (const button of document.querySelectorAll("[data-copy]")) {
     }
   });
 }
+
+/* The marginal navigation is a real table of contents, not decorative status. */
+const chapterLinks = Array.from(document.querySelectorAll(".rail .stage"));
+const chapters = chapterLinks.map((link) => document.querySelector(link.getAttribute("href"))).filter(Boolean);
+function activateChapter(id) {
+  for (const link of chapterLinks) {
+    const active = link.getAttribute("href") === "#" + id;
+    link.classList.toggle("active", active);
+    if (active) {
+      link.setAttribute("aria-current", "step");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  }
+}
+for (const link of chapterLinks) {
+  link.addEventListener("click", () => activateChapter(link.hash.slice(1)));
+}
+if ("IntersectionObserver" in window) {
+  const chapterObserver = new IntersectionObserver(
+    (entries) => {
+      const visible = entries.filter((entry) => entry.isIntersecting)
+        .sort((left, right) => left.boundingClientRect.top - right.boundingClientRect.top);
+      if (visible.length > 0) activateChapter(visible[0].target.id);
+    },
+    { rootMargin: "-10% 0px -60% 0px" }
+  );
+  for (const chapter of chapters) chapterObserver.observe(chapter);
+}

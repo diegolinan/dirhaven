@@ -126,6 +126,7 @@ func (w wizard) handler() http.Handler {
 		{"/", "web/index.html", "text/html; charset=utf-8"},
 		{"/app.css", "web/app.css", "text/css; charset=utf-8"},
 		{"/app.js", "web/app.js", "application/javascript; charset=utf-8"},
+		{"/dirhaven-mark.svg", "web/dirhaven-mark.svg", "image/svg+xml"},
 	} {
 		asset := asset
 		mux.HandleFunc(asset.route, func(out http.ResponseWriter, req *http.Request) {

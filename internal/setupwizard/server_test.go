@@ -49,7 +49,7 @@ func TestWizardBoundToHostAndRequiresToken(t *testing.T) {
 	if strings.Contains(resp.Body.String(), w.token) {
 		t.Fatal("secret leaked into static HTML")
 	}
-	for _, asset := range []string{"/app.js", "/app.css"} {
+	for _, asset := range []string{"/app.js", "/app.css", "/dirhaven-mark.svg"} {
 		r := requestWizard(t, w, http.MethodGet, asset, "", "", nil)
 		if r.Code != http.StatusOK || len(r.Body.Bytes()) == 0 {
 			t.Fatalf("missing static asset %s: %d", asset, r.Code)

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Dirhaven - layered folders and an open doorway</title>
+  <!-- Layered sheets: deliberate, user-chosen filesystem boundaries. -->
+  <path fill="#FDEA55" d="M47 17 113 7v78H47z"/>
+  <path fill="#00C7D1" d="m37 31 66-10v71H37z"/>
+  <path fill="#F17192" d="m29 44 63-10v67H29z"/>
+  <!-- The black folder surrounds a visible, open passage - no lock or shield. -->
+  <path fill="#161515" fill-rule="evenodd" d="M10 54h31l11 12h37l14 10v44H10V54Zm37 35 27-13v44H47V89Z"/>
+  <path fill="#F17192" d="m76 80 11-6v46H76z"/>
+  <path fill="#161515" d="M29 119h47l-12-9-35 9z"/>
+</svg>

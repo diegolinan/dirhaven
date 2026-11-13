@@ -16,6 +16,14 @@ The intended experience is:
 
 Users on plans without full ChatGPT Web MCP capability must still be able to use Dirhaven with another compatible local stdio MCP client.
 
+## Visual identity (editorial pass)
+
+The Setup Wizard now uses the project's approved graphic direction: an original layered-folder/doorway SVG mark derived from the initial identity concept, paper `#FBF8F5`, ink `#161515`, pink `#F17192`, cyan `#00C7D1`, yellow `#FDEA55`, large grotesk headings, thin editorial rules, print-like captions and a dark marginal table of contents. The artwork is a clean, scalable vector interpretation; it is not a pixel-identical crop of the raster concept board.
+
+Typography follows the personal-site roles (Die Grotesk Medium/Regular and Space Mono). **Licensed font binaries are not copied into this public repository**: CSS uses locally available family names and safe system fallbacks. Bundling licensed App font files into public releases requires confirming the corresponding redistribution rights first.
+
+The visual pass changes only embedded frontend assets, its static SVG route and basic chapter navigation. User-chosen root validation, explicit broad-access acknowledgment, tunnel credentials and MCP behavior remain unchanged. Desktop, notebook, tablet and mobile layout checks cover 1440, 1024, 768, 390 and 320 CSS-pixel widths in local Chrome; native Go tests cover API static assets.
+
 ## First working slice (this branch)
 
 Run `dirhaven setup` (after building `./cmd/dirhaven`) to launch a local browser wizard.

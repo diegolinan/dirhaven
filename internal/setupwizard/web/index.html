@@ -3,32 +3,42 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#fbf8f5">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" type="image/svg+xml" href="/dirhaven-mark.svg">
   <title>Dirhaven Setup</title>
   <link rel="stylesheet" href="/app.css">
   <script src="/app.js" defer></script>
 </head>
 <body>
-  <div class="ambient" aria-hidden="true"></div>
+  <a class="skip-link" href="#main">Skip to setup</a>
   <div class="shell">
     <aside class="rail">
-      <div class="wordmark"><span class="monogram">D</span><span>DIRHAVEN <small>SETUP</small></span></div>
-      <div class="rail-kicker">YOUR FILES. YOUR BOUNDARIES.</div>
+      <div class="wordmark"><span class="brand-tile"><img src="/dirhaven-mark.svg" alt="" width="62" height="62"></span><span class="brand-type">DIRHAVEN <small>SETUP / 0.2 DEV</small></span></div>
+      <div class="rail-kicker">YOUR FILES.<br>YOUR BOUNDARIES.</div>
       <nav aria-label="Setup stages">
-        <div class="stage active"><span>01</span><div>Compatibility<small>What your account permits</small></div></div>
-        <div class="stage"><span>02</span><div>Access boundaries<small>You choose the folders</small></div></div>
-        <div class="stage"><span>03</span><div>Local configuration<small>Validate before connecting</small></div></div>
-        <div class="stage"><span>04</span><div>ChatGPT connection<small>Private tunnel, your control</small></div></div>
+        <a class="stage active" href="#compatibility" aria-current="step"><span>01</span><div>Compatibility<small>What your account permits</small></div></a>
+        <a class="stage" href="#boundaries"><span>02</span><div>Access boundaries<small>You choose the folders</small></div></a>
+        <a class="stage" href="#local"><span>03</span><div>Local configuration<small>Validate before connecting</small></div></a>
+        <a class="stage" href="#connection"><span>04</span><div>ChatGPT connection<small>Private tunnel, your control</small></div></a>
       </nav>
-      <div class="rail-bottom"><span class="status-dot"></span> LOCAL SETUP ONLY <p>No keys collected. No files changed. No cloud account required to prepare your local configuration.</p></div>
+      <div class="rail-bottom"><span class="status-dot"></span> PRIVATE BY DESIGN <p>No keys collected. No files changed. Your local configuration stays yours.</p><span class="rail-rule" aria-hidden="true"></span><span class="rail-colophon">OPEN SOURCE / LOCAL FIRST</span></div>
     </aside>
-    <main class="content">
-      <div class="topline"><span>DIRHAVEN / INITIAL CONFIGURATION</span><span class="version">v0.2.0 preview</span></div>
+    <main class="content" id="main" tabindex="-1">
+      <div class="topline"><span>DIRHAVEN <span aria-hidden="true">//</span> INSTALLATION NOTES</span><span class="version">EDITION 002 / SETUP PREVIEW</span></div>
       <header class="hero">
-        <div class="eyebrow">TAKE CONTROL OF YOUR WORKSPACE</div>
-        <h1>Your computer.<br><em>Your call.</em></h1>
-        <p>Give your MCP client access to precisely the folders you choose. We'll prepare the local configuration, then guide you through a private ChatGPT connection.</p>
+        <div class="hero-copy">
+          <div class="eyebrow">LOCAL FIRST <span aria-hidden="true">/</span> YOU DECIDE</div>
+          <h1>Your computer.<br><em>Your call.</em></h1>
+          <p>Give your MCP client access to precisely the folders you choose. We'll prepare the local configuration, then guide you through a private ChatGPT connection.</p>
+          <span class="hero-underline" aria-hidden="true"></span>
+        </div>
+        <figure class="hero-art">
+          <div class="hero-paper" aria-hidden="true"><img src="/dirhaven-mark.svg" alt="" width="220" height="220"></div>
+          <figcaption><span>FIG. 01</span> <span>THE BOUNDARY IS YOURS TO DRAW.</span></figcaption>
+        </figure>
       </header>
+      <div class="section-banner" aria-hidden="true"><span>01 - 04 / SETUP SEQUENCE</span><span class="palette-bars"><i></i><i></i><i></i></span></div>
       <section class="panel" id="compatibility">
         <div class="section-head"><div class="number">01</div><div><h2>Check your ChatGPT access</h2><p>OpenAI plans and workspace policies determine what the connection can do.</p></div></div>
         <div class="columns">
@@ -92,7 +102,7 @@
         </div>
         <div class="note">Dirhaven never creates a shared public plugin. Each user owns their connection. Steps may change as OpenAI updates its interface; always defer to the linked official documentation.</div>
       </section>
-      <footer>DIRHAVEN · LOCAL FIRST · <a href="https://github.com/diegolinan/dirhaven" target="_blank" rel="noopener noreferrer">OPEN SOURCE / APACHE 2.0</a></footer>
+      <footer><span>DIRHAVEN <span aria-hidden="true">/</span> YOUR FILES. YOUR BOUNDARIES.</span><a href="https://github.com/diegolinan/dirhaven" target="_blank" rel="noopener noreferrer">OPEN SOURCE / APACHE 2.0 ↗</a></footer>
     </main>
   </div>
 </body>

@@ -1,0 +1,14 @@
+Dirhaven
+Copyright 2026 Diego Liñan
+
+The Dirhaven software is available under the Apache License, Version 2.0.
+See LICENSE for the complete license text.
+
+Third-party Go modules retain their respective copyrights and licenses.
+See third_party/README.md and third_party/licenses/ for attribution and
+license copies.
+
+The Dirhaven product banner is not licensed under Apache-2.0.
+See assets/BRANDING.md.
+
+This NOTICE is informational and does not modify license terms.

@@ -32,7 +32,7 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
-      - name: Build and calculate SHA-256
+      - name: Build, bundle license notices and calculate SHA-256
         shell: pwsh
         env:
           GOOS: ${{ matrix.goos }}
@@ -43,11 +43,17 @@ jobs:
           $path = Join-Path dist $name
           go build -trimpath -o $path ./cmd/dirhaven
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Copy-Item LICENSE, NOTICE, README.md, SECURITY.md, CONTRIBUTING.md -Destination dist
+          Copy-Item third_party/README.md -Destination dist/THIRD_PARTY_README.md
+          New-Item -ItemType Directory -Path dist/third_party -Force | Out-Null
+          Copy-Item third_party/licenses -Destination dist/third_party -Recurse
           $digest = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
-          "$digest  $name" | Set-Content -LiteralPath "$path.sha256" -Encoding utf8
+          $utf8 = New-Object System.Text.UTF8Encoding($false)
+          [System.IO.File]::WriteAllText("$path.sha256", "$digest  $name`n", $utf8)
+          if ((Get-ChildItem dist/third_party/licenses -Filter '*.LICENSE' -File).Count -ne 15) { throw 'Missing third-party module license copies' }
       - name: Upload unpublished package
         uses: actions/upload-artifact@v4
         with:
           name: dirhaven-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/*
+          path: dist/**
           if-no-files-found: error

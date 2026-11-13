@@ -1,8 +1,8 @@
 # Dirhaven v0.1.0 - release readiness (draft)
 
-**Status: NOT READY TO TAG OR PUBLISH AS OPEN SOURCE.**
+**Status: Apache-2.0 source license present; NOT READY TO TAG v0.1.0.**
 
-This document records observed behavior and release gates. It does not grant any copyright or redistribution license.
+This document records observed behavior and release gates. The software license is the repository's root LICENSE (Apache-2.0); this document does not modify it.
 
 ## Verified
 
@@ -21,19 +21,23 @@ This document records observed behavior and release gates. It does not grant any
 
 ## Remaining release gates
 
-- [ ] Owner approves source-code provenance, copyright, third-party reuse rights and an explicit root `LICENSE`.
-- [ ] Audit direct **and transitive** Go dependency licenses and distribute required notices.
+- [x] Add the exact Apache-2.0 root `LICENSE`, project `NOTICE`, and a separate brand-artwork rights statement. **This grant cannot be treated as reversible simply by withholding a release tag.**
+- [ ] Owner confirms source-code provenance and ownership/redistribution rights for code extracted from the earlier private repository.
+- [x] Inventory the full 15-module Go graph with versions and preserve original module-level LICENSE and PATENTS texts in `third_party/licenses/`.
+- [ ] Recheck exact tagged dependencies for additional nested obligations and confirm license notices are included in the *actual downloaded binaries*.
 - [ ] Run and publish a reproducible ChatGPT Web acceptance report with an explicitly authorized directory and an out-of-root denial check, without changing the owner's broader live configuration unexpectedly.
 - [ ] Confirm the public tool/schema contract for all 17 tools and document compatibility expectations.
-- [ ] Produce release builds for Windows, Linux and macOS, with SHA-256 checksums and clean-install checks.
-- [ ] Add security contact, vulnerability reporting policy, contribution terms and support limitations.
+- [x] Prepare manual-only packaging workflow for Windows, Linux and macOS that includes the binary, SHA-256 checksum, root LICENSE/NOTICE and third-party module notices.
+- [ ] Execute that workflow, verify artifact contents/checksums and clean-install checks on all three operating systems.
+- [x] Add `SECURITY.md` and `CONTRIBUTING.md` with vulnerability-handling guidance, contribution terms and current support limitations.
+- [ ] Confirm a working private security-reporting channel in the repository settings before tagging.
 - [ ] Audit the **exact release tree and artifacts** for local credentials, filesystem paths, private identifiers, unpublished material and third-party branding.
 - [ ] Confirm native CI is green on the **exact commit** that will be tagged.
 - [ ] Only after owner approval, create an explicitly labeled `v0.1.0` pre-release tag and release entry.
 
 ## Proposed first pre-release scope
 
-`dirhaven serve --allow /absolute/path` starts a local `stdio` MCP server. It is a standalone source/build distribution; it **does not** provide a hosted service, install OpenAI plugins, create tunnels or grant unrestricted filesystem access by default.
+`dirhaven serve --allow /absolute/path` starts a local `stdio` MCP server. `--allow-all` is explicitly available on Windows, Linux and macOS when a user chooses broad filesystem access. It is a standalone source/build distribution; it **does not** provide a hosted service, install OpenAI plugins, create tunnels or grant unrestricted filesystem access by default.
 
 The public release notes can claim private ChatGPT Web read/write integration was exercised, but **must not** claim formally audited confinement, universally available ChatGPT write actions, production-grade lifecycle management or general release readiness.
 

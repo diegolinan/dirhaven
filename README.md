@@ -2,15 +2,18 @@
 
 **Your files. Your boundaries.**
 
-Give AI agents access to the files they need, without automatically granting access to every file on the machine.
+**Use ChatGPT on the web to work with files on your own computer, inside folders you explicitly authorize.**
 
-Dirhaven is a **local-first filesystem MCP server written in Go**. It exposes local file and directory operations to compatible Model Context Protocol (MCP) clients, constrained to roots that the operator explicitly allows.
+Dirhaven is a **local-first filesystem MCP server written in Go**. Its primary use case is connecting ChatGPT Web to your local filesystem through an OpenAI-supported MCP connection, while enforcing explicitly configured directory boundaries. Other MCP clients that support local `stdio` servers can also use Dirhaven directly.
+
+Dirhaven itself runs locally. ChatGPT does **not** connect straight to your computer: this use case requires a separate OpenAI Secure MCP Tunnel and custom MCP plugin configuration. Dirhaven does not ship those components.
 
 > **Status: early development, not a tagged release.** The current implementation was extracted into a new standalone source module. It must not be treated as audited, fully portable or feature-complete. Distribution licensing and contribution terms are not yet finalized.
 
 ## What Dirhaven does
 
-- Operates locally over **stdio MCP**; it does not start a network server or require a cloud account.
+- Enables the **ChatGPT Web -> secure connection -> local files** workflow when the required OpenAI integration is configured.
+- Runs locally over **stdio MCP**; it does not start a network server or itself require a cloud account.
 - Limits operations to explicitly allowed directory roots using Go filesystem confinement mechanisms.
 - Offers **14 compatibility-oriented filesystem tools** plus **3 bounded source-selection tools**.
 - Supports reading, searching, listing, creating, editing, moving and inspecting files inside the authorized roots.
@@ -19,12 +22,25 @@ Dirhaven is a **local-first filesystem MCP server written in Go**. It exposes lo
 
 **Dirhaven does not run AI models.** Your MCP client supplies the agent and decides which available tools to call.
 
-## Quick start
+## Primary use case: ChatGPT Web accessing local files
+
+Dirhaven provides the local filesystem endpoint. To use it **from ChatGPT in a browser**, an operator must separately connect ChatGPT to that endpoint using OpenAI's **Secure MCP Tunnel** and a **custom MCP plugin**. ChatGPT cannot launch a local `stdio` executable directly from the web interface.
+
+Dirhaven **does not bundle, create, configure, or maintain** OpenAI tunnels, tunnel clients, plugins, account credentials or workspace permissions. Those are external setup requirements, may change independently and may be restricted by account or workspace policies. Follow the official instructions instead of a copied setup tutorial:
+
+- [Connecting custom MCP servers in ChatGPT](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt)
+- [Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
+
+Once the connection is configured and running, ChatGPT can discover and request Dirhaven tools within the authorized directories, subject to client-side approvals and permissions. **Dirhaven has not yet completed a published end-to-end ChatGPT Web acceptance test**, so the entire workflow remains a release validation gate.
+
+The current Secure MCP Tunnel mechanism supports private connections, **not public plugin submission**. Dirhaven is source code that operators can deploy for their own use; it is not a preinstalled ChatGPT plugin. Other compatible MCP clients may connect directly over `stdio` without an OpenAI tunnel.
+
+## Build and run Dirhaven locally
 
 ### Requirements
 
 - Go **1.27** or later to build from source.
-- A compatible MCP client capable of launching a local stdio server.
+- A compatible MCP client, or an OpenAI Secure MCP Tunnel configured to launch the local `stdio` server.
 
 ### Build
 
@@ -52,9 +68,9 @@ Windows PowerShell:
 
 To allow more than one location, repeat `--allow PATH`. The directories must exist.
 
-Dirhaven speaks MCP over standard input/output. **It is not an interactive shell**: configure your MCP client to launch the binary and supply the arguments above.
+Dirhaven speaks MCP over standard input/output. **It is not an interactive shell**. Configure the OpenAI tunnel client or a compatible local MCP client to launch the binary with the arguments above.
 
-Example MCP client configuration (replace the binary path and root with paths on your machine):
+Example for a **local MCP client** (not ChatGPT Web or a Secure MCP Tunnel configuration; replace the binary path and root with paths on your machine):
 
 ```json
 {
@@ -68,19 +84,6 @@ Example MCP client configuration (replace the binary path and root with paths on
 ```
 
 Different MCP hosts may use different configuration formats. This snippet illustrates the command and argument boundary, not a universal configuration schema.
-
-### Connecting Dirhaven to ChatGPT
-
-**Additional setup is required.** Dirhaven provides the local MCP server, but **does not provide or manage OpenAI Secure MCP Tunnels, ChatGPT plugins, accounts, credentials, or workspace permissions**.
-
-Unlike MCP clients that can launch a local `stdio` server directly, ChatGPT cannot directly launch Dirhaven on your computer. For the current local `stdio` version, you must independently set up an OpenAI-supported connection to your local server (such as **Secure MCP Tunnel**) and configure the corresponding **custom MCP plugin** in ChatGPT, subject to your account and workspace permissions.
-
-**Dirhaven does not configure or install these OpenAI components.** Their availability, setup and naming may change independently of this project. Always follow OpenAI's current official documentation rather than relying on instructions copied into this repository:
-
-- [Connecting custom MCP servers in ChatGPT](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt)
-- [Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
-
-This setup is **specific to ChatGPT**, not a universal requirement for using Dirhaven with other MCP clients. Only grant access to folders you intend to share with the connected AI client.
 
 ### Optional local metrics
 
@@ -149,8 +152,8 @@ This repository is a **source-only extraction**. It does not include the private
 
 ## Roadmap
 
-1. Validate the independent package and each exposed MCP tool on native runners.
-2. Add clean install examples and compatible-client smoke tests.
+1. **Validate end-to-end ChatGPT Web access to a disposable local directory** through a separately configured OpenAI Secure MCP Tunnel and custom MCP plugin, including tool discovery, safe read/write operations and denial outside authorized roots.
+2. Keep the 17 exposed MCP tools compatible and maintain native Windows, Linux and macOS tests; add smoke tests for other MCP clients.
 3. Publish a pinned, reviewed dependency inventory and choose an explicit open-source license after rights review.
 4. Document support/versioning guarantees and prepare the first tagged pre-release.
 5. Continue cross-platform confinement and compatibility testing.

@@ -49,10 +49,28 @@ func TestWizardBoundToHostAndRequiresToken(t *testing.T) {
 	if strings.Contains(resp.Body.String(), w.token) {
 		t.Fatal("secret leaked into static HTML")
 	}
-	for _, asset := range []string{"/app.js", "/app.css", "/dirhaven-mark.svg"} {
+	if !strings.Contains(resp.Body.String(), "/foundation.css") ||
+		!strings.Contains(resp.Body.String(), "/work.css") ||
+		!strings.Contains(resp.Body.String(), "/setup.css") {
+		t.Fatal("page must load the original Work design system and setup adapter")
+	}
+	for _, asset := range []string{"/app.js", "/foundation.css", "/work.css", "/setup.css", "/dirhaven-mark.svg"} {
 		r := requestWizard(t, w, http.MethodGet, asset, "", "", nil)
 		if r.Code != http.StatusOK || len(r.Body.Bytes()) == 0 {
 			t.Fatalf("missing static asset %s: %d", asset, r.Code)
+		}
+	}
+	// Private previews embed licensed local font assets, whereas builds
+	// produced from public source omit them without failing compilation.
+	for _, font := range []string{"etm-grotesk-medium.woff2", "etm-grotesk-regular.woff2", "space-mono-regular.woff2"} {
+		_, embeddedError := webAssets.ReadFile("web/assets/" + font)
+		response := requestWizard(t, w, http.MethodGet, "/assets/"+font, "", "", nil)
+		if embeddedError == nil {
+			if response.Code != http.StatusOK || response.Header().Get("Content-Type") != "font/woff2" {
+				t.Fatalf("locally embedded font %s unavailable: status %d", font, response.Code)
+			}
+		} else if response.Code != http.StatusNotFound {
+			t.Fatalf("unbundled font %s should return 404: %d", font, response.Code)
 		}
 	}
 	payload := scopeRequest{Mode: "scoped", Paths: []string{t.TempDir()}}

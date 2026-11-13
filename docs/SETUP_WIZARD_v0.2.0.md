@@ -16,13 +16,17 @@ The intended experience is:
 
 Users on plans without full ChatGPT Web MCP capability must still be able to use Dirhaven with another compatible local stdio MCP client.
 
-## Visual identity (editorial pass)
+## Visual identity (direct Work page reuse)
 
-The Setup Wizard now uses the project's approved graphic direction: an original layered-folder/doorway SVG mark derived from the initial identity concept, paper `#FBF8F5`, ink `#161515`, pink `#F17192`, cyan `#00C7D1`, yellow `#FDEA55`, large grotesk headings, thin editorial rules, print-like captions and a dark marginal table of contents. The artwork is a clean, scalable vector interpretation; it is not a pixel-identical crop of the raster concept board.
+The setup page is now built on the **actual** `diegolinan.me/work/` structure: original `.work-frame`, `.work-header`, `.work-intro`, `.work-sections`, `.work-list`, `.work-entry`, and `.work-footer` markup conventions. These files were copied **verbatim** from the owner's local personal-site repository:
+- `internal/setupwizard/web/foundation.css` - original `D:/Projects/diegolinan.me/foundation.css`
+- `internal/setupwizard/web/work.css` - original `D:/Projects/diegolinan.me/pages/work-index/work.css`
 
-Typography follows the personal-site roles (Die Grotesk Medium/Regular and Space Mono). **Licensed font binaries are not copied into this public repository**: CSS uses locally available family names and safe system fallbacks. Bundling licensed App font files into public releases requires confirming the corresponding redistribution rights first.
+The new `setup.css` contains only functional adaptations needed for forms, steps and responsive layout. It is **not** a separate reconstruction of the owner's visual system. The approved layered-folder/doorway logo concept is represented by a scalable SVG interpretation.
 
-The visual pass changes only embedded frontend assets, its static SVG route and basic chapter navigation. User-chosen root validation, explicit broad-access acknowledgment, tunnel credentials and MCP behavior remain unchanged. Desktop, notebook, tablet and mobile layout checks cover 1440, 1024, 768, 390 and 320 CSS-pixel widths in local Chrome; native Go tests cover API static assets.
+The owner authorized using the purchased Die Grotesk family. For local preview only, the three original `.woff2` binaries are copied from the personal website into `internal/setupwizard/web/assets/` and embedded in the development binary. Browser checks confirmed HTTP 200 and loaded font faces for `Die Grotesk`, `Die Grotesk Reading` and `Space Mono`. **The binaries are gitignored and are not included in the public Apache-2.0 source tree.** Public builds currently fall back to system fonts; before shipping a publicly downloadable executable with embedded font files, verify that the owner's license includes the required application embedding and distribution scope.
+
+The direct page reuse changes frontend assets, their static routes and in-page navigation only; root validation, deliberate `--allow-all` acknowledgment, sensitive credentials and MCP semantics are unchanged. Local Chromium checks cover 1440, 1024, 768, 390 and 320 CSS-pixel widths with original fonts loaded and tested UI interactions. Native Go tests validate the local HTTP static assets and authorization boundary.
 
 ## First working slice (this branch)
 

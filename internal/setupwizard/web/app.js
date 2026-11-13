@@ -137,15 +137,15 @@ for (const button of document.querySelectorAll("[data-copy]")) {
   });
 }
 
-/* The marginal navigation is a real table of contents, not decorative status. */
-const chapterLinks = Array.from(document.querySelectorAll(".rail .stage"));
+/* Navigation follows the actual Work page's editorial section links. */
+const chapterLinks = Array.from(document.querySelectorAll(".work-sections a"));
 const chapters = chapterLinks.map((link) => document.querySelector(link.getAttribute("href"))).filter(Boolean);
 function activateChapter(id) {
   for (const link of chapterLinks) {
     const active = link.getAttribute("href") === "#" + id;
     link.classList.toggle("active", active);
     if (active) {
-      link.setAttribute("aria-current", "step");
+      link.setAttribute("aria-current", "location");
     } else {
       link.removeAttribute("aria-current");
     }

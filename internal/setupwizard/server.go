@@ -124,9 +124,14 @@ func (w wizard) handler() http.Handler {
 		route, filename, mime string
 	}{
 		{"/", "web/index.html", "text/html; charset=utf-8"},
-		{"/app.css", "web/app.css", "text/css; charset=utf-8"},
+		{"/foundation.css", "web/foundation.css", "text/css; charset=utf-8"},
+		{"/work.css", "web/work.css", "text/css; charset=utf-8"},
+		{"/setup.css", "web/setup.css", "text/css; charset=utf-8"},
 		{"/app.js", "web/app.js", "application/javascript; charset=utf-8"},
 		{"/dirhaven-mark.svg", "web/dirhaven-mark.svg", "image/svg+xml"},
+		{"/assets/etm-grotesk-medium.woff2", "web/assets/etm-grotesk-medium.woff2", "font/woff2"},
+		{"/assets/etm-grotesk-regular.woff2", "web/assets/etm-grotesk-regular.woff2", "font/woff2"},
+		{"/assets/space-mono-regular.woff2", "web/assets/space-mono-regular.woff2", "font/woff2"},
 	} {
 		asset := asset
 		mux.HandleFunc(asset.route, func(out http.ResponseWriter, req *http.Request) {
@@ -136,6 +141,12 @@ func (w wizard) handler() http.Handler {
 			}
 			data, err := webAssets.ReadFile(asset.filename)
 			if err != nil {
+				// Licensed font binaries are supplied by the owner for local
+				// previews only. Public source builds use system fallbacks.
+				if strings.HasPrefix(asset.route, "/assets/") {
+					http.NotFound(out, req)
+					return
+				}
 				http.Error(out, "asset unavailable", http.StatusInternalServerError)
 				return
 			}
@@ -150,7 +161,7 @@ func (w wizard) handler() http.Handler {
 		out.Header().Set("X-Content-Type-Options", "nosniff")
 		out.Header().Set("X-Frame-Options", "DENY")
 		out.Header().Set("Referrer-Policy", "no-referrer")
-		out.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
+		out.Header().Set("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
 		if req.Host != w.address {
 			http.Error(out, "host not permitted", http.StatusForbidden)
 			return

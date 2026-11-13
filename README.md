@@ -1,5 +1,7 @@
 # Dirhaven
 
+![Dirhaven - Your files. Your boundaries.](assets/dirhaven-banner-1280x640-v1.jpg)
+
 **Your files. Your boundaries.**
 
 **Use ChatGPT on the web to work with files on your own computer, inside folders you explicitly authorize.**

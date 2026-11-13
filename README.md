@@ -10,7 +10,7 @@ Dirhaven is a **local-first filesystem MCP server written in Go**. Its primary u
 
 Dirhaven itself runs locally. ChatGPT does **not** connect straight to your computer: this use case requires a separate OpenAI Secure MCP Tunnel and custom MCP plugin configuration. Dirhaven does not ship those components.
 
-> **Status: early development, not a tagged release.** The current implementation was extracted into a new standalone source module. It must not be treated as audited, fully portable or feature-complete. Distribution licensing and contribution terms are not yet finalized.
+> **Status: early development, not a tagged release.** A private ChatGPT Web integration has exercised file read, create, edit and independent disk verification through the standalone Dirhaven backend using an existing Secure MCP Tunnel and plugin. This is not a formal security audit or a publicly reproducible acceptance report. Distribution licensing and contribution terms remain undecided.
 
 ## Why Dirhaven exists
 
@@ -26,7 +26,7 @@ Dirhaven is **not** a replacement for Codex CLI, ChatGPT Work, a terminal, or a 
 
 Dirhaven fulfills its primary purpose when a user can open ChatGPT Web, request a change to a file on their own computer, have that change performed through the **standalone Dirhaven server** without manually uploading the file, and confirm that attempts to access files **outside the authorized roots are denied**.
 
-A successful build, green tests on three operating systems, and a working local MCP connection are necessary engineering evidence. **None of them alone proves the ChatGPT Web workflow works.** Until an end-to-end test demonstrates that exact path using disposable files and a separately configured OpenAI connection, the product's primary use case remains unvalidated.
+The core ChatGPT Web read/write workflow has been exercised in a private deployment through an existing tunnel and plugin: a temporary file was created, edited, read, and independently checked on disk. **This is evidence for that private integration, not a general security guarantee.** Denial outside authorized roots was not established in this live deployment because its operator enabled `--allow-all-drives`. A reproducible acceptance run with explicit roots and an out-of-root denial check remains a release gate.
 
 ## What Dirhaven does
 
@@ -49,7 +49,7 @@ Dirhaven **does not bundle, create, configure, or maintain** OpenAI tunnels, tun
 - [Connecting custom MCP servers in ChatGPT](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt)
 - [Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
 
-Once the connection is configured and running, ChatGPT can discover and request Dirhaven tools within the authorized directories, subject to client-side approvals and permissions. **Dirhaven has not yet completed a published end-to-end ChatGPT Web acceptance test**, so the entire workflow remains a release validation gate.
+Once the connection is configured and running, ChatGPT can discover and request Dirhaven tools within the authorized directories, subject to client-side approvals and permissions. **A private ChatGPT Web read/write integration has been verified**, but a published, reproducible acceptance report with explicit allowed roots and denial checks remains a release gate.
 
 The current Secure MCP Tunnel mechanism supports private connections, **not public plugin submission**. Dirhaven is source code that operators can deploy for their own use; it is not a preinstalled ChatGPT plugin. Other compatible MCP clients may connect directly over `stdio` without an OpenAI tunnel.
 
@@ -170,7 +170,7 @@ This repository is a **source-only extraction**. It does not include the private
 
 ## Roadmap
 
-1. **Validate end-to-end ChatGPT Web access to a disposable local directory** through a separately configured OpenAI Secure MCP Tunnel and custom MCP plugin, including tool discovery, safe read/write operations and denial outside authorized roots.
+1. **Publish reproducible ChatGPT Web acceptance evidence** with explicit authorized roots and an out-of-root denial check. Private read/write access through an existing tunnel is verified; live denial outside authorized roots is not.
 2. Keep the 17 exposed MCP tools compatible and maintain native Windows, Linux and macOS tests; add smoke tests for other MCP clients.
 3. Publish a pinned, reviewed dependency inventory and choose an explicit open-source license after rights review.
 4. Document support/versioning guarantees and prepare the first tagged pre-release.

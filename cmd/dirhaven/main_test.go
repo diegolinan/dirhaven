@@ -16,9 +16,10 @@ func TestCliBasics(t *testing.T) {
 		contains string
 	}{
 		{args: []string{"help"}, ok: true, contains: "Dirhaven"},
-		{args: []string{"version"}, ok: true, contains: "dirhaven 0.1.0"},
+		{args: []string{"version"}, ok: true, contains: "dirhaven 0.2.0-dev"},
 		{args: nil, ok: false, contains: "subcommand required"},
 		{args: []string{"serve"}, ok: false, contains: "at least one --allow"},
+		{args: []string{"setup", "--unexpected"}, ok: false, contains: "setup does not accept arguments"},
 		{args: []string{"serve", "--allow", "relative-path-that-does-not-exist"}, ok: false, contains: "relative-path-that-does-not-exist"},
 		{args: []string{"serve", "--unknown"}, ok: false, contains: "flag provided but not defined"},
 		{args: []string{"serve", "--allow", "x", "unexpected"}, ok: false, contains: "unexpected positional"},

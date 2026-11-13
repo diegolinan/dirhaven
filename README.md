@@ -10,7 +10,7 @@ Dirhaven is a **local-first filesystem MCP server written in Go**. Its primary u
 
 Dirhaven itself runs locally. ChatGPT does **not** connect straight to your computer: this use case requires a separate OpenAI Secure MCP Tunnel and custom MCP plugin configuration. Dirhaven does not ship those components.
 
-> **Status: v0.1.0 early pre-release.** A private ChatGPT Web integration has exercised file read, create, edit and independent disk verification through the standalone Dirhaven backend using an existing Secure MCP Tunnel and plugin. This is not a formal security audit or a publicly reproducible acceptance report. Source code is licensed under Apache-2.0 (see LICENSE); the owner confirms this is a personal project derived from his own earlier code, though no independent legal audit was performed. Third-party modules retain their own licenses.
+> **Status: v0.1.0 is the latest tagged pre-release; `main` includes experimental v0.2.0-dev setup work.** A private ChatGPT Web integration has exercised file read, create, edit and independent disk verification through the standalone Dirhaven backend using an existing Secure MCP Tunnel and plugin. This is not a formal security audit or a publicly reproducible acceptance report. Source code is licensed under Apache-2.0 (see LICENSE); the owner confirms this is a personal project derived from his own earlier code, though no independent legal audit was performed. Third-party modules retain their own licenses.
 
 ## Why Dirhaven exists
 
@@ -69,6 +69,16 @@ go build ./cmd/dirhaven
 ```
 
 The executable will be `dirhaven.exe` on Windows or `dirhaven` on macOS/Linux.
+
+### Setup Wizard (development preview)
+
+The development branch includes a local browser-based setup assistant. After building from source:
+
+```sh
+dirhaven setup
+```
+
+The wizard checks user-selected directory roots, requires explicit confirmation for broad access and prepares a local command and generic stdio MCP configuration example. It links to current OpenAI guidance for configuring an independently owned Secure MCP Tunnel and ChatGPT connection. **This is not yet a native installer:** it does not register services, install tunnel software, capture credentials or create ChatGPT plugins. The setup page is served only on `127.0.0.1` for the life of the command; press Ctrl+C to close it. See [v0.2.0 Setup Wizard scope](docs/SETUP_WIZARD_v0.2.0.md).
 
 ### Run
 
@@ -167,7 +177,8 @@ Passing these tests does not imply that every OS filesystem feature, edge case o
 ## Scope of this repository
 
 ```text
-cmd/dirhaven/           Standalone stdio CLI
+cmd/dirhaven/           Standalone stdio CLI and experimental setup command
+internal/setupwizard/   Local browser setup UI and metadata-only root validation
 internal/filesystem/    MCP tool handlers, root confinement and tests
 internal/mcpmetrics/    Optional content-free local metrics
 docs/                   Security and compatibility scope

@@ -13,9 +13,10 @@ import (
 
 	"github.com/diegolinan/dirhaven/internal/filesystem"
 	"github.com/diegolinan/dirhaven/internal/mcpmetrics"
+	"github.com/diegolinan/dirhaven/internal/setupwizard"
 )
 
-const version = "0.1.0"
+const version = "0.2.0-dev"
 
 type rootFlags []string
 
@@ -32,6 +33,7 @@ func usage(w io.Writer) {
 	fmt.Fprintln(w, "  dirhaven serve --allow PATH [--allow PATH ...]")
 	fmt.Fprintln(w, "  dirhaven serve --allow-all                 (all OSes, broad access)")
 	fmt.Fprintln(w, "  dirhaven serve --allow-all-drives          (Windows legacy alias)")
+	fmt.Fprintln(w, "  dirhaven setup                             (local setup wizard preview)")
 	fmt.Fprintln(w, "  dirhaven version")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "Options for serve:")
@@ -55,6 +57,11 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	case "version", "--version", "-version":
 		fmt.Fprintf(stdout, "dirhaven %s (%s/%s)\n", version, runtime.GOOS, runtime.GOARCH)
 		return nil
+	case "setup":
+		if len(args) != 1 {
+			return errors.New("setup does not accept arguments")
+		}
+		return setupwizard.Start(ctx, stdout)
 	case "serve":
 		roots, metricsPath, err := parseServeOptions(args[1:], stderr)
 		if err != nil {

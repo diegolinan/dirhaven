@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Dirhaven Setup</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <div class="shell">
+    <aside class="rail">
+      <div class="wordmark"><span class="monogram">D</span><span>DIRHAVEN <small>SETUP</small></span></div>
+      <div class="rail-kicker">YOUR FILES. YOUR BOUNDARIES.</div>
+      <nav aria-label="Setup stages">
+        <div class="stage active"><span>01</span><div>Compatibility<small>What your account permits</small></div></div>
+        <div class="stage"><span>02</span><div>Access boundaries<small>You choose the folders</small></div></div>
+        <div class="stage"><span>03</span><div>Local configuration<small>Validate before connecting</small></div></div>
+        <div class="stage"><span>04</span><div>ChatGPT connection<small>Private tunnel, your control</small></div></div>
+      </nav>
+      <div class="rail-bottom"><span class="status-dot"></span> LOCAL SETUP ONLY <p>No keys collected. No files changed. No cloud account required to prepare your local configuration.</p></div>
+    </aside>
+    <main class="content">
+      <div class="topline"><span>DIRHAVEN / INITIAL CONFIGURATION</span><span class="version">v0.2.0 preview</span></div>
+      <header class="hero">
+        <div class="eyebrow">TAKE CONTROL OF YOUR WORKSPACE</div>
+        <h1>Your computer.<br><em>Your call.</em></h1>
+        <p>Give your MCP client access to precisely the folders you choose. We'll prepare the local configuration, then guide you through a private ChatGPT connection.</p>
+      </header>
+      <section class="panel" id="compatibility">
+        <div class="section-head"><div class="number">01</div><div><h2>Check your ChatGPT access</h2><p>OpenAI plans and workspace policies determine what the connection can do.</p></div></div>
+        <div class="columns">
+          <div class="field"><label for="plan">Your ChatGPT plan</label>
+            <select id="plan">
+              <option value="unknown">I'm not sure / another plan</option>
+              <option value="enterprise">Enterprise / Edu</option>
+              <option value="business">Business</option>
+              <option value="pro">Pro</option>
+            </select>
+          </div>
+          <div class="field"><label for="role">Your workspace permissions</label>
+            <select id="role">
+              <option value="unsure">Not checked yet</option>
+              <option value="authorized">Admin / owner / authorized developer</option>
+              <option value="restricted">No permission to add MCP servers</option>
+            </select>
+          </div>
+        </div>
+        <div class="advice" id="planAdvice" role="status">ChatGPT Web full MCP support is documented for Business and Enterprise/Edu accounts, subject to workspace permissions. You can still use Dirhaven with other local MCP clients.</div>
+        <p class="footnote">Dirhaven cannot read your ChatGPT plan or bypass your workspace's permissions. <a target="_blank" rel="noopener noreferrer" href="https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt">Review OpenAI's current requirements</a>.</p>
+      </section>
+      <section class="panel" id="boundaries">
+        <div class="section-head"><div class="number">02</div><div><h2>Set your boundaries</h2><p>No drive names, home folders, or mount points are assumed.</p></div></div>
+        <div class="choice-grid">
+          <label class="choice" id="scopedChoice"><input type="radio" name="mode" value="scoped" checked><span class="choice-icon">▣</span><strong>Selected folders</strong><small>Start with only the directories you approve.</small></label>
+          <label class="choice" id="allChoice"><input type="radio" name="mode" value="all"><span class="choice-icon">◎</span><strong>Broad access</strong><small>OS-specific filesystem roots, within account permissions.</small></label>
+        </div>
+        <div id="scopedFields" class="scope-input">
+          <label for="paths">Absolute directory paths <span class="quiet">(one per line)</span></label>
+          <textarea id="paths" rows="3" spellcheck="false" placeholder="Paste an existing absolute folder path here"></textarea>
+          <p class="input-hint">Windows: C:\Users\you\Projects · macOS: /Users/you/Projects · Linux: /home/you/Projects</p>
+        </div>
+        <div id="allFields" class="broad-box hidden">
+          <strong>Broad access is powerful.</strong>
+          <p>On Windows this covers accessible drive letters, not every UNC share. On Linux and macOS it covers filesystems under /. It won't elevate permissions, but an MCP client can request changes to real files.</p>
+          <label class="ack"><input id="ack" type="checkbox"> <span>I understand and intentionally authorize broad access.</span></label>
+        </div>
+      </section>
+      <section class="panel" id="local">
+        <div class="section-head"><div class="number">03</div><div><h2>Prepare local configuration</h2><p>Validate your choices on this computer. Nothing is installed or connected automatically.</p></div></div>
+        <div class="actions"><button class="primary" id="generate" type="button">Validate &amp; prepare <span aria-hidden="true">↗</span></button><span class="badge-state" id="state">NOT VALIDATED</span></div>
+        <div id="validationError" class="error hidden" role="alert"></div>
+        <div id="results" class="results hidden">
+          <div class="success-line">✓ Local paths validated. Your configuration is ready to copy.</div>
+          <div class="result-head"><strong>Run Dirhaven locally</strong><button type="button" class="copy" data-copy="command">Copy command</button></div>
+          <pre id="command" tabindex="0"></pre>
+          <div class="result-head"><strong>Example for a local stdio MCP client</strong><button type="button" class="copy" data-copy="client">Copy JSON</button></div>
+          <pre id="client" tabindex="0"></pre>
+          <p class="footnote">This JSON example is for compatible local MCP clients. <strong>Do not paste it into ChatGPT Web.</strong> ChatGPT Web uses a separate Secure MCP Tunnel and custom MCP plugin.</p>
+        </div>
+      </section>
+      <section class="panel connection" id="connection">
+        <div class="section-head"><div class="number">04</div><div><h2>Connect to ChatGPT Web</h2><p>These are separate steps. Local configuration isn't proof that a tunnel or plugin is connected.</p></div></div>
+        <div class="checklist">
+          <div class="checkline"><div class="check-number">1</div><div><strong>Create or reuse a private tunnel</strong><p>Use OpenAI Platform tunnel settings. Confirm the correct Platform organization, ChatGPT workspace, and Read/Use/Manage permissions.</p><a target="_blank" rel="noopener noreferrer" href="https://platform.openai.com/settings/organization/tunnels">Open tunnel settings ↗</a></div></div>
+          <div class="checkline"><div class="check-number">2</div><div><strong>Configure the official tunnel client</strong><p>Point its local stdio command to your Dirhaven executable and chosen access scope. Keep API keys in protected local secret storage, never in this wizard or a shared configuration.</p><a target="_blank" rel="noopener noreferrer" href="https://developers.openai.com/api/docs/guides/secure-mcp-tunnels">Read official tunnel quickstart ↗</a></div></div>
+          <div class="checkline"><div class="check-number">3</div><div><strong>Verify connection health</strong><p>Run the official <code>tunnel-client doctor</code> command for your profile, then keep the tunnel client running and check its readiness.</p></div></div>
+          <div class="checkline"><div class="check-number">4</div><div><strong>Add your own custom MCP plugin</strong><p>In ChatGPT Web, open Plugins, select Add custom MCP server, choose Tunnel, and use your own tunnel ID. Approve the plugin's discovered tools.</p><a target="_blank" rel="noopener noreferrer" href="https://chatgpt.com/">Open ChatGPT ↗</a></div></div>
+          <div class="checkline"><div class="check-number">5</div><div><strong>Test a real file operation</strong><p>Test a permitted folder in ChatGPT, confirm the tool runs and verify the result locally. Do not regard the connection as complete until this works.</p></div></div>
+        </div>
+        <div class="note">Dirhaven never creates a shared public plugin. Each user owns their connection. Steps may change as OpenAI updates its interface; always defer to the linked official documentation.</div>
+      </section>
+      <footer>DIRHAVEN · LOCAL FIRST · <a href="https://github.com/diegolinan/dirhaven" target="_blank" rel="noopener noreferrer">OPEN SOURCE / APACHE 2.0</a></footer>
+    </main>
+  </div>
+</body>
+</html>

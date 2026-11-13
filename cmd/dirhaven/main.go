@@ -15,7 +15,7 @@ import (
 	"github.com/diegolinan/dirhaven/internal/mcpmetrics"
 )
 
-const version = "0.1.0-dev"
+const version = "0.1.0"
 
 type rootFlags []string
 

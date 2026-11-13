@@ -7,19 +7,18 @@ certification has been completed.
 
 ## Supported versions
 
-No stable or tagged releases are supported yet. The current `main` branch
-receives best-effort maintenance and should not be described as hardened
-production infrastructure.
+No stable release is supported yet. The `v0.1.0` pre-release and current
+`main` branch receive best-effort maintenance and should not be described as
+hardened production infrastructure.
 
 ## Reporting vulnerabilities
 
 Please **do not** publish exploit details, sensitive paths, tokens, or
 private file content in a public GitHub issue.
 
-Use GitHub's private vulnerability reporting for this repository if it is
-available. If that feature is unavailable, contact the maintainer through
-a pre-established private channel before sharing sensitive details.
-A reliable private contact channel must be confirmed before v0.1.0.
+Use GitHub's enabled private vulnerability reporting for this repository.
+If that feature becomes unavailable, contact the maintainer through a
+pre-established private channel before sharing sensitive details.
 
 For non-sensitive defects and feature requests, GitHub issues are suitable.
 

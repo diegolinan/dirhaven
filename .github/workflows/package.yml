@@ -1,4 +1,4 @@
-name: Dirhaven manual release packaging
+name: Dirhaven release packaging
 
 on:
   workflow_dispatch:
@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - .github/workflows/package.yml
+    tags: ['v*']
 
 permissions:
   contents: read
@@ -55,9 +56,63 @@ jobs:
           $utf8 = New-Object System.Text.UTF8Encoding($false)
           [System.IO.File]::WriteAllText("$path.sha256", "$digest  $name`n", $utf8)
           if ((Get-ChildItem dist/third_party/licenses -Filter '*.LICENSE' -File).Count -ne 15) { throw 'Missing third-party module license copies' }
-      - name: Upload unpublished package
+      - name: Upload platform package
         uses: actions/upload-artifact@v4
         with:
           name: dirhaven-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/**
           if-no-files-found: error
+
+  release:
+    name: Publish GitHub pre-release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download native packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dirhaven-*
+          path: staging
+      - name: Verify packages and assemble release archives
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path release -Force | Out-Null
+          $checksums = @()
+          foreach ($platform in @('windows-amd64', 'linux-amd64', 'darwin-arm64')) {
+            $stem = "dirhaven-$platform"
+            $source = Join-Path 'staging' $stem
+            if (-not (Test-Path -LiteralPath $source -PathType Container)) { throw "Missing platform artifact: $stem" }
+            $executable = if ($platform.StartsWith('windows')) { "$stem.exe" } else { $stem }
+            $binary = Join-Path $source $executable
+            $checksumPath = "$binary.sha256"
+            if (-not (Test-Path -LiteralPath $binary -PathType Leaf)) { throw "Missing executable: $binary" }
+            if (-not (Test-Path -LiteralPath $checksumPath -PathType Leaf)) { throw "Missing checksum: $checksumPath" }
+            $expected = ((Get-Content -LiteralPath $checksumPath -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+            $actual = (Get-FileHash -LiteralPath $binary -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($expected -ne $actual) { throw "Checksum mismatch: $binary" }
+            foreach ($required in @('LICENSE', 'NOTICE', 'README.md', 'SECURITY.md', 'CONTRIBUTING.md', 'THIRD_PARTY_README.md')) {
+              if (-not (Test-Path -LiteralPath (Join-Path $source $required) -PathType Leaf)) { throw "Missing $required in $stem" }
+            }
+            $thirdParty = Join-Path $source 'third_party/licenses'
+            if ((@(Get-ChildItem -LiteralPath $thirdParty -Filter '*.LICENSE' -File)).Count -ne 15) { throw "Missing third-party licenses in $stem" }
+            $archive = Join-Path 'release' "$stem.zip"
+            Compress-Archive -Path (Join-Path $source '*') -DestinationPath $archive -Force
+            $archiveHash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+            $checksums += "$archiveHash  $stem.zip"
+          }
+          $utf8 = New-Object System.Text.UTF8Encoding($false)
+          [System.IO.File]::WriteAllText('release/SHA256SUMS.txt', (($checksums -join "`n") + "`n"), $utf8)
+      - name: Publish GitHub pre-release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $assets = @(Get-ChildItem -Path release -Filter '*.zip' -File | ForEach-Object { $_.FullName })
+          if ($assets.Count -ne 3) { throw "Expected three release archives, found $($assets.Count)" }
+          gh release create $env:GITHUB_REF_NAME @assets 'release/SHA256SUMS.txt' --verify-tag --prerelease --title "Dirhaven $env:GITHUB_REF_NAME (pre-release)" --notes-file 'docs/RELEASE_NOTES_v0.1.0.md'
+          if ($LASTEXITCODE -ne 0) { throw 'GitHub release creation failed' }

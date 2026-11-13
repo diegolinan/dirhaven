@@ -16,7 +16,7 @@ func TestCliBasics(t *testing.T) {
 		contains string
 	}{
 		{args: []string{"help"}, ok: true, contains: "Dirhaven"},
-		{args: []string{"version"}, ok: true, contains: "dirhaven 0.1.0-dev"},
+		{args: []string{"version"}, ok: true, contains: "dirhaven 0.1.0"},
 		{args: nil, ok: false, contains: "subcommand required"},
 		{args: []string{"serve"}, ok: false, contains: "at least one --allow"},
 		{args: []string{"serve", "--allow", "relative-path-that-does-not-exist"}, ok: false, contains: "relative-path-that-does-not-exist"},

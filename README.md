@@ -10,7 +10,7 @@ Dirhaven is a **local-first filesystem MCP server written in Go**. Its primary u
 
 Dirhaven itself runs locally. ChatGPT does **not** connect straight to your computer: this use case requires a separate OpenAI Secure MCP Tunnel and custom MCP plugin configuration. Dirhaven does not ship those components.
 
-> **Status: early development, not a tagged release.** A private ChatGPT Web integration has exercised file read, create, edit and independent disk verification through the standalone Dirhaven backend using an existing Secure MCP Tunnel and plugin. This is not a formal security audit or a publicly reproducible acceptance report. Source code is licensed under Apache-2.0 (see LICENSE); the final rights/provenance audit is still required before a tagged release. Third-party modules retain their own licenses.
+> **Status: v0.1.0 early pre-release.** A private ChatGPT Web integration has exercised file read, create, edit and independent disk verification through the standalone Dirhaven backend using an existing Secure MCP Tunnel and plugin. This is not a formal security audit or a publicly reproducible acceptance report. Source code is licensed under Apache-2.0 (see LICENSE); the owner confirms this is a personal project derived from his own earlier code, though no independent legal audit was performed. Third-party modules retain their own licenses.
 
 ## Why Dirhaven exists
 
@@ -180,8 +180,8 @@ This repository is a **source-only extraction**. It does not include the private
 
 1. **Publish reproducible ChatGPT Web acceptance evidence** with explicit authorized roots and an out-of-root denial check. Private read/write access through an existing tunnel is verified; live denial outside authorized roots is not.
 2. Keep the 17 exposed MCP tools compatible and maintain native Windows, Linux and macOS tests; add smoke tests for other MCP clients.
-3. Publish a pinned, reviewed dependency inventory and choose an explicit open-source license after rights review.
-4. Document support/versioning guarantees and prepare the first tagged pre-release.
+3. Keep dependency license inventories and release packages aligned with pinned module versions.
+4. Establish support/versioning guarantees and mature the pre-release distribution process.
 5. Continue cross-platform confinement and compatibility testing.
 
-**Licensing:** Dirhaven source code is under [Apache License 2.0](LICENSE), with third-party terms and copies in [third_party/](third_party/README.md). The existing [brand artwork is separately reserved](assets/BRANDING.md). Rights/provenance confirmation and release-artifact license validation remain gates for the first tagged release.
+**Licensing:** Dirhaven source code is under [Apache License 2.0](LICENSE), with third-party terms and copies in [third_party/](third_party/README.md). The existing [brand artwork is separately reserved](assets/BRANDING.md). Dependency license copies and release-artifact checks accompany the first pre-release. The owner's source-provenance representation is documented in the release-readiness notes.

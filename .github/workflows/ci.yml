@@ -1,0 +1,35 @@
+name: Dirhaven Go CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Go tests - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Go from go.mod
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Show Go version
+        run: go version
+      - name: Run all Go tests
+        run: go test -timeout=120s ./...
+      - name: Run race tests (Linux and macOS)
+        if: runner.os != 'Windows'
+        run: go test -race -timeout=120s ./...
+      - name: Vet
+        run: go vet ./...
+      - name: Build standalone CLI
+        run: go build ./cmd/dirhaven

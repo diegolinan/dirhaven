@@ -10,6 +10,22 @@ Dirhaven itself runs locally. ChatGPT does **not** connect straight to your comp
 
 > **Status: early development, not a tagged release.** The current implementation was extracted into a new standalone source module. It must not be treated as audited, fully portable or feature-complete. Distribution licensing and contribution terms are not yet finalized.
 
+## Why Dirhaven exists
+
+ChatGPT Web is a powerful place to work through ideas, code, documents, and decisions. But working with a file that already lives on your own computer can mean uploading it, copying its contents into a conversation, or switching to a separate coding or computer-use environment.
+
+**Dirhaven exists to close that gap.** Its goal is to make it possible to stay in a regular ChatGPT Web conversation and ask ChatGPT to find, read, create, edit, or organize files on your computer, **without manually transferring those files into the chat**, once the required connection is configured.
+
+The value is not simply another implementation of a filesystem MCP server. It is the connection between **a web conversation and the user's actual local filesystem**, with access limited to directories the user explicitly authorizes.
+
+Dirhaven is **not** a replacement for Codex CLI, ChatGPT Work, a terminal, or a general-purpose computer-control agent. It provides a focused, locally running filesystem capability. OpenAI's tunnel and plugin infrastructure provide the separate connection into ChatGPT Web.
+
+### The acceptance test that matters
+
+Dirhaven fulfills its primary purpose when a user can open ChatGPT Web, request a change to a file on their own computer, have that change performed through the **standalone Dirhaven server** without manually uploading the file, and confirm that attempts to access files **outside the authorized roots are denied**.
+
+A successful build, green tests on three operating systems, and a working local MCP connection are necessary engineering evidence. **None of them alone proves the ChatGPT Web workflow works.** Until an end-to-end test demonstrates that exact path using disposable files and a separately configured OpenAI connection, the product's primary use case remains unvalidated.
+
 ## What Dirhaven does
 
 - Enables the **ChatGPT Web -> secure connection -> local files** workflow when the required OpenAI integration is configured.

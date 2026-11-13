@@ -21,8 +21,12 @@ func TestFilesystemRootsAndTraversal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(s.ListAllowedDirectories(), allowed) {
-		t.Fatal("missing root")
+	canonical, err := filepath.EvalSymlinks(allowed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(s.ListAllowedDirectories(), canonical) {
+		t.Fatal("missing canonical allowed root")
 	}
 	if content, err := s.ReadTextFile(filepath.Join(allowed, "sample.txt"), 2, 0); err != nil || content != "first\nsecond" {
 		t.Fatalf("head %q %v", content, err)

@@ -30,12 +30,14 @@ func usage(w io.Writer) {
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "Usage:")
 	fmt.Fprintln(w, "  dirhaven serve --allow PATH [--allow PATH ...]")
-	fmt.Fprintln(w, "  dirhaven serve --allow-all-drives          (Windows only, broad access)")
+	fmt.Fprintln(w, "  dirhaven serve --allow-all                 (all OSes, broad access)")
+	fmt.Fprintln(w, "  dirhaven serve --allow-all-drives          (Windows legacy alias)")
 	fmt.Fprintln(w, "  dirhaven version")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "Options for serve:")
-	fmt.Fprintln(w, "  --allow PATH         Allow this existing directory, repeatable")
-	fmt.Fprintln(w, "  --allow-all-drives   Allow all currently accessible Windows drive letters")
+	fmt.Fprintln(w, "  --allow PATH         Allow this existing directory, repeatable on every OS")
+	fmt.Fprintln(w, "  --allow-all          Allow every filesystem path accessible to this process")
+	fmt.Fprintln(w, "  --allow-all-drives   Legacy Windows-only all-drive-letter discovery")
 	fmt.Fprintln(w, "  --metrics-file PATH  Optional private JSONL metrics file")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "This server uses stdio; configure your MCP host to launch it.")
@@ -54,30 +56,16 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 		fmt.Fprintf(stdout, "dirhaven %s (%s/%s)\n", version, runtime.GOOS, runtime.GOARCH)
 		return nil
 	case "serve":
-		fs := flag.NewFlagSet("serve", flag.ContinueOnError)
-		fs.SetOutput(stderr)
-		var roots rootFlags
-		fs.Var(&roots, "allow", "explicitly authorized directory (repeatable)")
-		allDrives := fs.Bool("allow-all-drives", false, "authorize all Windows drive letters, including future mounts")
-		metricsPath := fs.String("metrics-file", "", "optional private JSONL metrics file")
-		if err := fs.Parse(args[1:]); err != nil {
+		roots, metricsPath, err := parseServeOptions(args[1:], stderr)
+		if err != nil {
 			return err
-		}
-		if len(fs.Args()) != 0 {
-			return errors.New("unexpected positional arguments")
-		}
-		if *allDrives {
-			roots = append(roots, "*")
-		}
-		if len(roots) == 0 {
-			return errors.New("at least one --allow PATH or --allow-all-drives is required")
 		}
 		service, err := filesystem.New(roots)
 		if err != nil {
 			return err
 		}
-		if *metricsPath != "" {
-			metrics, err := mcpmetrics.Open(*metricsPath)
+		if metricsPath != "" {
+			metrics, err := mcpmetrics.Open(metricsPath)
 			if err != nil {
 				return fmt.Errorf("cannot open metrics file: %w", err)
 			}
@@ -89,6 +77,40 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 		usage(stderr)
 		return fmt.Errorf("unknown subcommand %q", args[0])
 	}
+}
+
+// parseServeOptions keeps the root-authorization policy portable: on Windows
+// broad access discovers current and future drive letters dynamically;
+// macOS and Linux use the filesystem root, which includes their mount points.
+// Explicit --allow paths work on every supported OS and never assume a drive.
+func parseServeOptions(args []string, stderr io.Writer) ([]string, string, error) {
+	fs := flag.NewFlagSet("serve", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	var roots rootFlags
+	fs.Var(&roots, "allow", "explicitly authorized directory (repeatable)")
+	all := fs.Bool("allow-all", false, "authorize all accessible filesystem paths on this OS")
+	allDrives := fs.Bool("allow-all-drives", false, "legacy Windows-only drive-letter discovery")
+	metricsPath := fs.String("metrics-file", "", "optional private JSONL metrics file")
+	if err := fs.Parse(args); err != nil {
+		return nil, "", err
+	}
+	if len(fs.Args()) != 0 {
+		return nil, "", errors.New("unexpected positional arguments")
+	}
+	if *all {
+		if runtime.GOOS == "windows" {
+			roots = append(roots, "*")
+		} else {
+			roots = append(roots, string(os.PathSeparator))
+		}
+	}
+	if *allDrives {
+		roots = append(roots, "*")
+	}
+	if len(roots) == 0 {
+		return nil, "", errors.New("at least one --allow PATH, --allow-all or --allow-all-drives is required")
+	}
+	return []string(roots), *metricsPath, nil
 }
 
 func main() {

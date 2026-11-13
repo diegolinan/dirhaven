@@ -84,7 +84,15 @@ Windows PowerShell:
 .\dirhaven.exe serve --allow 'C:\path\to\workspace'
 ```
 
-To allow more than one location, repeat `--allow PATH`. The directories must exist.
+To allow more than one location, repeat `--allow PATH`. The directories must exist. On **Windows, macOS, and Linux**, the person running Dirhaven chooses the authorized paths; Dirhaven does not assume a particular drive letter, home directory, or mount point.
+
+For intentionally broad access on any supported OS:
+
+```sh
+dirhaven serve --allow-all
+```
+
+On Windows, this dynamically discovers accessible drive-letter roots, including newly mounted drive letters. On Linux and macOS, it authorizes `/`, including filesystem locations mounted underneath it, subject to the account's operating-system permissions. The older Windows-only `--allow-all-drives` flag remains supported for compatibility. **Broad access is optional and does not bypass OS permissions.**
 
 Dirhaven speaks MCP over standard input/output. **It is not an interactive shell**. Configure the OpenAI tunnel client or a compatible local MCP client to launch the binary with the arguments above.
 
@@ -139,7 +147,7 @@ These three tools do **not** summarize or semantically interpret source material
 - Do not expose its stdio transport to untrusted remote clients without an independently reviewed security boundary.
 - Windows-only `--allow-all-drives` (equivalent to `--allow '*'`) allows **all currently accessible drive letters**, including newly mounted drives. This is deliberately broad and should not be used for a least-privilege deployment.
 - Unmapped UNC shares and arbitrary non-drive mount points are not automatically covered by the Windows wildcard.
-- Dynamic drive discovery is unavailable on macOS/Linux. Explicit roots remain supported.
+- Windows drive-letter discovery is specific to Windows. `--allow-all` is supported on all three platforms: Windows discovers drives dynamically; macOS/Linux authorize `/` (including mounts under `/`). Explicit roots remain supported everywhere.
 
 See [Security and compatibility notes](docs/SAFETY_AND_COMPATIBILITY.md) for the precise development claims.
 

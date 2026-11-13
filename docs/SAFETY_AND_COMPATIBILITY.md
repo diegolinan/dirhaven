@@ -37,9 +37,13 @@ Native Go tests cover filesystem confinement and tool contracts. Compatibility w
 
 A green CI run is evidence of the tests in that workflow, not broad certification of every filesystem edge case or complete platform parity.
 
-## Optional Windows wildcard
+## Cross-platform user-selected paths and optional broad access
 
-`--allow-all-drives` includes accessible drive-letter roots, including newly mounted or mapped drive letters. This deliberately widens access. It must never be enabled by default by a distributor or MCP host integration.
+`--allow PATH` supports existing directories selected by the user on Windows, Linux and macOS, without assuming their location, drive or mount point. Multiple roots can be supplied.
+
+`--allow-all` is an explicit broad-access option on all three platforms. On Windows it uses dynamic accessible drive-letter discovery; `--allow-all-drives` remains a Windows-only compatibility alias. On Linux/macOS it authorizes `/`, including mounted directories beneath it. In either case, operating-system permissions still apply; the option does not escalate privileges.
+
+Broad access widens the trust boundary and must not be enabled by default by a distributor or MCP host integration. Authorization is an operator choice, not a hardcoded install location.
 
 ## Release gate
 

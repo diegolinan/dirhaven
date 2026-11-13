@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"os"
 	"runtime"
 	"strings"
 	"testing"
@@ -36,6 +37,25 @@ func TestCliBasics(t *testing.T) {
 		if !strings.Contains(observed, tc.contains) {
 			t.Errorf("%v: output %q did not contain %q", tc.args, observed, tc.contains)
 		}
+	}
+}
+
+func TestPortableAccessConfiguration(t *testing.T) {
+	var stderr bytes.Buffer
+	roots, _, err := parseServeOptions([]string{"--allow-all"}, &stderr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := string(os.PathSeparator)
+	if runtime.GOOS == "windows" {
+		want = "*"
+	}
+	if len(roots) != 1 || roots[0] != want {
+		t.Fatalf("--allow-all roots = %q, want %q", roots, want)
+	}
+	roots, _, err = parseServeOptions([]string{"--allow", "/user/path", "--allow", "/another/path"}, &stderr)
+	if err != nil || len(roots) != 2 || roots[0] != "/user/path" || roots[1] != "/another/path" {
+		t.Fatalf("explicit user paths were not preserved: roots=%q err=%v", roots, err)
 	}
 }
 

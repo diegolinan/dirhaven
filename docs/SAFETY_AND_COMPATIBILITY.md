@@ -1,6 +1,14 @@
 # Safety and compatibility boundaries
 
-Dirhaven is a local stdio MCP filesystem server. The server does not create a network endpoint by itself, choose an AI model, authenticate remote callers, or authorize individual agent actions beyond the configured filesystem roots.
+Dirhaven is a local stdio MCP filesystem server. Its **primary product goal** is to let a user work with files on their own computer **from ChatGPT Web**, within explicitly authorized directories. The server does not create a network endpoint by itself, choose an AI model, authenticate remote callers, or authorize individual agent actions beyond the configured filesystem roots.
+
+## End-to-end ChatGPT Web boundary
+
+The intended integration is **ChatGPT Web -> custom MCP plugin -> OpenAI Secure MCP Tunnel -> local Dirhaven stdio process -> authorized filesystem roots**. ChatGPT does not connect directly to a local process. The required tunnel client, plugin registration, workspace permissions and OpenAI account setup are external to this repository and must follow the current official OpenAI documentation.
+
+A green native Go test suite validates local server behavior, **not** that ChatGPT Web can reach it. An end-to-end test from ChatGPT through the actual tunnel and plugin, using only disposable authorized data, is a distinct acceptance gate. This test must confirm tool discovery, read operations, approved modifications where permitted and denial outside authorized roots. OpenAI-side tool availability and write permissions depend on the user's account and workspace.
+
+Secure MCP Tunnel is for private connections and is not itself a publicly distributable ChatGPT plugin. Direct local stdio use by other MCP clients is supported as an additional integration.
 
 ## Security-relevant behavior
 
@@ -35,4 +43,4 @@ A green CI run is evidence of the tests in that workflow, not broad certificatio
 
 ## Release gate
 
-The repository must not be called a finished open-source release until copyright/provenance, dependency licenses, a root LICENSE, supported configurations and independently reproduced build/test evidence are approved. Source may be visible publicly before those gates, but it is not yet licensed as open source.
+The repository must not be called a finished open-source release until copyright/provenance, dependency licenses, a root LICENSE, supported configurations, end-to-end ChatGPT Web connectivity evidence and independently reproduced build/test evidence are approved. Source may be visible publicly before those gates, but it is not yet licensed as open source.

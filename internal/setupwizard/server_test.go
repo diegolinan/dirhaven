@@ -89,7 +89,13 @@ func TestWizardScopeValidationAndExample(t *testing.T) {
 	if err := json.Unmarshal(good.Body.Bytes(), &data); err != nil {
 		t.Fatal(err)
 	}
-	if !data.OK || len(data.Roots) != 1 || data.Roots[0] != dir {
+	// macOS resolves temporary /var paths to /private/var, just as
+	// filesystem.New does for authorized directory roots.
+	canonical, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !data.OK || len(data.Roots) != 1 || data.Roots[0] != canonical {
 		t.Fatalf("incorrect scope result: %+v", data)
 	}
 	if !strings.Contains(data.Command, "--allow") || !strings.Contains(data.MCPClientJSON, "\"mcpServers\"") {
@@ -111,7 +117,7 @@ func TestWizardScopeValidationAndExample(t *testing.T) {
 	if err := json.Unmarshal([]byte(data.MCPClientJSON), &example); err != nil {
 		t.Fatal(err)
 	}
-	if client := example.MCPServers["dirhaven"]; client.Command != w.command || len(client.Args) != 3 || client.Args[2] != dir {
+	if client := example.MCPServers["dirhaven"]; client.Command != w.command || len(client.Args) != 3 || client.Args[2] != canonical {
 		t.Fatalf("wrong MCP stdio example: %+v", client)
 	}
 	for _, bad := range []scopeRequest{

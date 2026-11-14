@@ -49,6 +49,7 @@ Source: "..\..\dist\dirhaven-windows-amd64.exe"; DestDir: "{app}"; DestName: "{#
 Source: "..\..\assets\dirhaven-installer.ico"; DestDir: "{app}"; DestName: "dirhaven.ico"; Flags: ignoreversion
 Source: "..\..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\NOTICE"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\assets\BRANDING.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\SECURITY.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\CONTRIBUTING.md"; DestDir: "{app}"; Flags: ignoreversion

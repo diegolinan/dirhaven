@@ -66,6 +66,10 @@ jobs:
           $utf8 = New-Object System.Text.UTF8Encoding($false)
           [System.IO.File]::WriteAllText('dist/installer/SHA256SUMS.txt', "$digest  Dirhaven-Setup-0.2.0-dev-windows-x64.exe`n", $utf8)
           Write-Output "Installer SHA256: $digest"
+      - name: Acceptance test - install, shortcuts and uninstall on ephemeral runner
+        shell: pwsh
+        run: |
+          ./installers/windows/test-install.ps1 -Installer 'dist/installer/Dirhaven-Setup-0.2.0-dev-windows-x64.exe' -SandboxDir (Join-Path $env:RUNNER_TEMP 'dirhaven-ci-acceptance')
       - name: Upload private preview artifact
         uses: actions/upload-artifact@v4
         with:

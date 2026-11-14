@@ -140,6 +140,19 @@ select:focus-visible, textarea:focus-visible, input:focus-visible {
 .choice strong { font: 500 1.15rem/1.13 var(--display); }
 .choice small { font: 400 .8rem/1.45 var(--body); color: #514c49; }
 .scope-input { margin-top: 25px; }
+.picker-actions { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.pick-directory {
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  padding: 8px 12px;
+  color: var(--ink);
+  cursor: pointer;
+  font: 400 .74rem/1.4 var(--mono);
+}
+.pick-directory:hover { background: var(--yellow); }
+.pick-directory:disabled { cursor: wait; opacity: .6; }
+.picker-status { color: #514c49; font: 400 .72rem/1.55 var(--mono); }
+
 .quiet { color: #625c5c; }
 .broad-box strong { font: 500 1.35rem/1.2 var(--display); }
 .broad-box p { font: 400 .87rem/1.55 var(--body); }

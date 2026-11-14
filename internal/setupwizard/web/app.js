@@ -11,6 +11,8 @@ const advice = document.getElementById("planAdvice");
 const scopedFields = document.getElementById("scopedFields");
 const allFields = document.getElementById("allFields");
 const paths = document.getElementById("paths");
+const pickDirectory = document.getElementById("pickDirectory");
+const pickerStatus = document.getElementById("pickerStatus");
 const ack = document.getElementById("ack");
 const generate = document.getElementById("generate");
 const stateBadge = document.getElementById("state");
@@ -66,6 +68,46 @@ plan.addEventListener("change", updatePlan);
 role.addEventListener("change", updatePlan);
 updateMode();
 updatePlan();
+
+pickDirectory.addEventListener("click", async () => {
+  if (!sessionToken) {
+    pickerStatus.textContent = "Setup session expired. Restart 'dirhaven setup'.";
+    return;
+  }
+  pickDirectory.disabled = true;
+  pickerStatus.textContent = "Waiting for the desktop folder chooser...";
+  try {
+    const response = await fetch("/api/pick-directory", {
+      method: "POST",
+      mode: "same-origin",
+      cache: "no-store",
+      headers: { "X-Dirhaven-Setup-Token": sessionToken }
+    });
+    if (!response.ok) {
+      throw new Error(response.status === 409
+        ? "A directory chooser is already open."
+        : "Desktop chooser unavailable. Paste an absolute path instead.");
+    }
+    const data = await response.json();
+    if (data.cancelled) {
+      pickerStatus.textContent = "Selection cancelled. No access was granted.";
+      return;
+    }
+    if (!data.ok || !data.path) {
+      pickerStatus.textContent = data.error || "Could not select a folder.";
+      return;
+    }
+    const existing = paths.value.split(/\r?\n/).map(item => item.trim()).filter(Boolean);
+    if (!existing.includes(data.path)) existing.push(data.path);
+    paths.value = existing.join("\n");
+    resetResult();
+    pickerStatus.textContent = "Folder added to the list. Validate to prepare access.";
+  } catch (reason) {
+    pickerStatus.textContent = reason.message || "Folder chooser could not be opened.";
+  } finally {
+    pickDirectory.disabled = false;
+  }
+});
 
 generate.addEventListener("click", async () => {
   if (!sessionToken) {

@@ -35,13 +35,14 @@ Run `dirhaven setup` (after building `./cmd/dirhaven`) to launch a local browser
 - Embedded visual UI, same Go binary on Windows, macOS and Linux.
 - The setup listener binds exclusively to an ephemeral `127.0.0.1` port. A random authorization token is carried in the initial URL fragment, then removed from the address bar. API requests must present the token and be from the correct host and origin.
 - The wizard reads **directory metadata only**, validating that chosen absolute paths exist and are directories. It never scans their contents.
+- A user-triggered **Choose folder** action opens a native desktop folder dialog through the OS (Windows Forms dialog, macOS AppleScript, Linux Zenity or KDialog). It appends a chosen absolute path to the editable list, but never grants access by itself. The list must still be validated separately. Headless Linux systems without a picker retain manual entry. Only one picker may be active per wizard session, and requests require the same local token and host/origin checks as validation.
 - `--allow-all` requires a separate explicit acknowledgement.
 - Outputs a correctly quoted local shell command and a **generic local stdio MCP client JSON example**. The JSON example is not a ChatGPT Web plugin configuration.
 - Links to authoritative current OpenAI instructions for plan compatibility, tunnel setup and plugin creation.
 - No credentials are requested or stored. No files, services, tunnels, plugins or OS settings are created or changed by setup.
 - Closing the process immediately stops the local setup listener.
 
-**Limitations:** directory paths are currently pasted rather than chosen through a native folder picker. The browser wizard is a *configuration assistant*, not yet an installer. It does not install `tunnel-client`, automate OpenAI account actions, discover the user's plan or workspace permissions, track tunnel health, or verify a ChatGPT tool call.
+**Limitations:** the native folder picker API, cancellation/error handling and browser interactions have automated tests, but the actual interactive OS dialog still requires manual acceptance on each supported desktop environment. The browser wizard is a *configuration assistant*, not yet an installer. It does not install `tunnel-client`, automate OpenAI account actions, discover the user's plan or workspace permissions, track tunnel health, or verify a ChatGPT tool call.
 
 ## Stable requirements
 
@@ -57,7 +58,7 @@ Run `dirhaven setup` (after building `./cmd/dirhaven`) to launch a local browser
 ## Next milestones
 
 1. **Native install/uninstall:** Windows installation package, signed/notarized macOS package and Linux distribution packaging, with shortcuts and clean removal. Decide signing/build tool after reviewing reproducibility and signing constraints.
-2. **Native folder selection:** platform-specific folder picker with manual entry fallback; never infer or hardcode locations.
+2. **Native folder selection:** platform-specific folder picker with manual entry fallback is implemented; complete manual GUI acceptance on Windows/macOS/Linux desktop sessions and tighten accessibility as needed.
 3. **Config persistence:** store non-secret roots under per-user OS configuration directories, with explicit review, edit and revoke; move secret references to OS-approved secure storage.
 4. **Tunnel integration:** detection, official-client installation by verified source/checksum, profile generation, `doctor`, explicit run/start/stop and health monitoring. Always reuse rather than overwrite existing tunnels.
 5. **Account capability diagnostics:** separate local status from independently verified platform tunnel access, workspace authorization and ChatGPT plugin usability. Track feature changes via versioned guidance grounded in official documentation.

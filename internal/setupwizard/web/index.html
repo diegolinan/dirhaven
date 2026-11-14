@@ -126,7 +126,8 @@
           </label>
         </div>
         <div id="scopedFields" class="scope-input">
-          <label for="paths">Absolute directory paths <span class="quiet">(one per line)</span></label>
+          <label for="paths">Authorized directories <span class="quiet">(one per line)</span></label>
+          <div class="picker-actions"><button type="button" id="pickDirectory" class="pick-directory">Choose folder ↗</button><span id="pickerStatus" class="picker-status" role="status">Or paste an absolute directory path below.</span></div>
           <textarea id="paths" rows="3" spellcheck="false" placeholder="Enter an existing absolute directory path"></textarea>
           <p class="input-hint">Windows: C:\Users\you\Projects / macOS: /Users/you/Projects / Linux: /home/you/Projects</p>
         </div>

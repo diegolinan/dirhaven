@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync/atomic"
 	"time"
 )
 
@@ -42,9 +43,11 @@ type scopeResponse struct {
 }
 
 type wizard struct {
-	address string
-	token   string
-	command string
+	address       string
+	token         string
+	command       string
+	pickDirectory func(context.Context) (string, error)
+	pickerBusy    *atomic.Bool
 }
 
 // Start opens a browser-based wizard on a random IPv4 loopback port.
@@ -68,9 +71,11 @@ func Start(ctx context.Context, output io.Writer) error {
 		return fmt.Errorf("locate Dirhaven executable: %w", err)
 	}
 	w := wizard{
-		address: listener.Addr().String(),
-		token:   token,
-		command: executable,
+		address:       listener.Addr().String(),
+		token:         token,
+		command:       executable,
+		pickDirectory: chooseDirectory,
+		pickerBusy:    &atomic.Bool{},
 	}
 	server := &http.Server{
 		Handler:           w.handler(),
@@ -155,6 +160,7 @@ func (w wizard) handler() http.Handler {
 		})
 	}
 	mux.HandleFunc("/api/validate", w.handleValidate)
+	mux.HandleFunc("/api/pick-directory", w.handlePickDirectory)
 
 	return http.HandlerFunc(func(out http.ResponseWriter, req *http.Request) {
 		out.Header().Set("Cache-Control", "no-store")
@@ -172,6 +178,50 @@ func (w wizard) handler() http.Handler {
 		}
 		mux.ServeHTTP(out, req)
 	})
+}
+
+// handlePickDirectory opens an OS dialog only after an authorized user click.
+// The path is not added to scope until the user separately validates the form.
+func (w wizard) handlePickDirectory(out http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		http.Error(out, "POST required", http.StatusMethodNotAllowed)
+		return
+	}
+	if subtle.ConstantTimeCompare([]byte(req.Header.Get("X-Dirhaven-Setup-Token")), []byte(w.token)) != 1 {
+		http.Error(out, "setup authorization required", http.StatusUnauthorized)
+		return
+	}
+	if w.pickDirectory == nil {
+		http.Error(out, "folder picker unavailable", http.StatusNotImplemented)
+		return
+	}
+	if w.pickerBusy != nil && !w.pickerBusy.CompareAndSwap(false, true) {
+		http.Error(out, "another folder picker is already open", http.StatusConflict)
+		return
+	}
+	if w.pickerBusy != nil {
+		defer w.pickerBusy.Store(false)
+	}
+	out.Header().Set("Content-Type", "application/json; charset=utf-8")
+	path, err := w.pickDirectory(req.Context())
+	if err != nil {
+		if errors.Is(err, errPickerCancelled) {
+			_ = json.NewEncoder(out).Encode(struct {
+				OK        bool `json:"ok"`
+				Cancelled bool `json:"cancelled"`
+			}{Cancelled: true})
+			return
+		}
+		_ = json.NewEncoder(out).Encode(struct {
+			OK    bool   `json:"ok"`
+			Error string `json:"error"`
+		}{Error: "Could not open a desktop folder picker. You can paste the path manually."})
+		return
+	}
+	_ = json.NewEncoder(out).Encode(struct {
+		OK   bool   `json:"ok"`
+		Path string `json:"path"`
+	}{OK: true, Path: path})
 }
 
 func (w wizard) handleValidate(out http.ResponseWriter, req *http.Request) {

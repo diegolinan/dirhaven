@@ -31,6 +31,10 @@ const checkChosenTunnel = document.getElementById("checkChosenTunnel");
 const browseTunnel = document.getElementById("browseTunnel");
 const fingerprintTunnel = document.getElementById("fingerprintTunnel");
 const fingerprintStatus = document.getElementById("fingerprintStatus");
+const archivePath = document.getElementById("archivePath");
+const manifestPath = document.getElementById("manifestPath");
+const verifyArchive = document.getElementById("verifyArchive");
+const archiveStatus = document.getElementById("archiveStatus");
 const chosenTunnelStatus = document.getElementById("chosenTunnelStatus");
 let savedRevision = "";
 let savedChoice = null;
@@ -342,6 +346,40 @@ fingerprintTunnel.addEventListener("click", async () => {
     fingerprintStatus.textContent = cause.message || "Fingerprint unavailable.";
   } finally {
     fingerprintTunnel.disabled = false;
+  }
+});
+
+for (const field of [archivePath, manifestPath]) {
+  field.addEventListener("input", () => {
+    archiveStatus.textContent = "Not checked for these selections.";
+  });
+}
+verifyArchive.addEventListener("click", async () => {
+  if (!sessionToken || !archivePath.value.trim() || !manifestPath.value.trim()) {
+    archiveStatus.textContent = "Choose an absolute ZIP path and its SHA256SUMS.txt before comparing.";
+    return;
+  }
+  verifyArchive.disabled = true;
+  archiveStatus.textContent = "Comparing selected release ZIP with selected checksum manifest locally...";
+  try {
+    const response = await fetch("/api/tunnel-archive-verify", {
+      method: "POST", mode: "same-origin", cache: "no-store",
+      headers: { "Content-Type": "application/json", "X-Dirhaven-Setup-Token": sessionToken },
+      body: JSON.stringify({ archivePath: archivePath.value.trim(), manifestPath: manifestPath.value.trim() })
+    });
+    if (!response.ok) throw new Error("Local ZIP checksum comparison request failed.");
+    const data = await response.json();
+    if (data.error) {
+      archiveStatus.textContent = data.error + " Origin: NOT VERIFIED.";
+    } else if (data.matches) {
+      archiveStatus.textContent = "CHECKSUM MATCH: " + data.archiveName + ". SHA-256 " + data.archiveSHA256 + ". Manifest origin and signed provenance: NOT VERIFIED.";
+    } else {
+      archiveStatus.textContent = "CHECKSUM MISMATCH: the selected ZIP does not match the manifest. Do not install it. Origin: NOT VERIFIED.";
+    }
+  } catch (cause) {
+    archiveStatus.textContent = cause.message || "Unable to compare selected files.";
+  } finally {
+    verifyArchive.disabled = false;
   }
 });
 

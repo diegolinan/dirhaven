@@ -180,6 +180,7 @@ func (w wizard) handler() http.Handler {
 	mux.HandleFunc("/api/tunnel-selected", w.handleChosenTunnelDiagnostic)
 	mux.HandleFunc("/api/pick-tunnel-file", w.handlePickTunnelFile)
 	mux.HandleFunc("/api/tunnel-fingerprint", w.handleTunnelFingerprint)
+	mux.HandleFunc("/api/tunnel-archive-verify", w.handleArchiveVerify)
 
 	return http.HandlerFunc(func(out http.ResponseWriter, req *http.Request) {
 		out.Header().Set("Cache-Control", "no-store")

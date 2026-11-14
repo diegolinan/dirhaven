@@ -26,6 +26,9 @@ const saveScope = document.getElementById("saveScope");
 const savedStatus = document.getElementById("savedStatus");
 const checkTunnel = document.getElementById("checkTunnel");
 const tunnelStatus = document.getElementById("tunnelStatus");
+const tunnelPath = document.getElementById("tunnelPath");
+const checkChosenTunnel = document.getElementById("checkChosenTunnel");
+const chosenTunnelStatus = document.getElementById("chosenTunnelStatus");
 let savedRevision = "";
 let savedChoice = null;
 let validatedScope = null;
@@ -277,6 +280,37 @@ checkTunnel.addEventListener("click", async () => {
     tunnelStatus.textContent = cause.message || "Cannot check local executable availability.";
   } finally {
     checkTunnel.disabled = false;
+  }
+});
+
+checkChosenTunnel.addEventListener("click", async () => {
+  const chosen = tunnelPath.value.trim();
+  if (!sessionToken) {
+    chosenTunnelStatus.textContent = "Setup authorization expired. Restart Dirhaven Setup.";
+    return;
+  }
+  if (!chosen) {
+    chosenTunnelStatus.textContent = "Enter an absolute path to a tunnel-client executable.";
+    return;
+  }
+  checkChosenTunnel.disabled = true;
+  chosenTunnelStatus.textContent = "Inspecting only the chosen file's metadata...";
+  try {
+    const response = await fetch("/api/tunnel-selected", {
+      method: "POST", mode: "same-origin", cache: "no-store",
+      headers: { "Content-Type": "application/json", "X-Dirhaven-Setup-Token": sessionToken },
+      body: JSON.stringify({ path: chosen })
+    });
+    if (!response.ok) throw new Error("Selected file inspection request failed.");
+    const data = await response.json();
+    chosenTunnelStatus.textContent = (data.executableName
+      ? "Candidate found: " + data.executableName + ". "
+      : "Candidate not confirmed. ") +
+      (data.nextStep || "") + " Connection status: NOT CHECKED.";
+  } catch (cause) {
+    chosenTunnelStatus.textContent = cause.message || "Cannot inspect the chosen file.";
+  } finally {
+    checkChosenTunnel.disabled = false;
   }
 });
 

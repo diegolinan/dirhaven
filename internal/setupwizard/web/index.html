@@ -181,6 +181,12 @@
           <p>Check whether the official <code>tunnel-client</code> command is discoverable on this computer's PATH. This never checks your existing tunnel profile, keys, runtime processes or ChatGPT connection.</p>
           <button type="button" class="copy" id="checkTunnel">Check local availability</button>
           <p class="tunnel-status" id="tunnelStatus" role="status">Not checked. No tunnel diagnostics have been performed.</p>
+          <div class="chosen-tunnel">
+            <label for="tunnelPath">Or specify a different tunnel-client executable</label>
+            <input id="tunnelPath" type="text" spellcheck="false" autocomplete="off" placeholder="Absolute path to tunnel-client executable">
+            <button type="button" class="copy" id="checkChosenTunnel">Inspect selected file</button>
+            <p class="tunnel-status" id="chosenTunnelStatus" role="status">No file selected. This check reads filename and filesystem metadata only, never file contents.</p>
+          </div>
         </div>
         <ol class="checklist">
           <li class="checkline"><span class="check-number">01</span><div><strong>Create or reuse a private tunnel</strong><p>Use OpenAI Platform tunnel settings. Confirm the Platform organization, ChatGPT workspace and required Read/Use/Manage permissions.</p><a href="https://platform.openai.com/settings/organization/tunnels" target="_blank" rel="noopener noreferrer">Open tunnel settings ↗</a></div></li>

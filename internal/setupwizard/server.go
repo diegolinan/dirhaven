@@ -175,6 +175,7 @@ func (w wizard) handler() http.Handler {
 	mux.HandleFunc("/api/save", w.handleSave)
 	mux.HandleFunc("/api/revoke", w.handleRevoke)
 	mux.HandleFunc("/api/tunnel-diagnostic", w.handleTunnelDiagnostic)
+	mux.HandleFunc("/api/tunnel-selected", w.handleChosenTunnelDiagnostic)
 
 	return http.HandlerFunc(func(out http.ResponseWriter, req *http.Request) {
 		out.Header().Set("Cache-Control", "no-store")

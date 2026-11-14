@@ -24,6 +24,8 @@ const loadSaved = document.getElementById("loadSaved");
 const revokeSaved = document.getElementById("revokeSaved");
 const saveScope = document.getElementById("saveScope");
 const savedStatus = document.getElementById("savedStatus");
+const checkTunnel = document.getElementById("checkTunnel");
+const tunnelStatus = document.getElementById("tunnelStatus");
 let savedRevision = "";
 let savedChoice = null;
 let validatedScope = null;
@@ -251,6 +253,32 @@ revokeSaved.addEventListener("click", async () => {
   }
 });
 void refreshSavedPreferences();
+
+checkTunnel.addEventListener("click", async () => {
+  if (!sessionToken) {
+    tunnelStatus.textContent = "Setup authorization expired. Restart Dirhaven Setup.";
+    return;
+  }
+  checkTunnel.disabled = true;
+  tunnelStatus.textContent = "Checking only for the tunnel-client command on PATH...";
+  try {
+    const response = await fetch("/api/tunnel-diagnostic", {
+      method: "GET", mode: "same-origin", cache: "no-store",
+      headers: { "X-Dirhaven-Setup-Token": sessionToken }
+    });
+    if (!response.ok) throw new Error("Local discovery request failed.");
+    const data = await response.json();
+    tunnelStatus.textContent = (data.clientOnPath
+      ? "Found " + (data.executableName || "tunnel-client") + " on PATH. "
+      : "No tunnel-client executable found on PATH. ") +
+      (data.nextStep || "") +
+      " Connection status: NOT CHECKED.";
+  } catch (cause) {
+    tunnelStatus.textContent = cause.message || "Cannot check local executable availability.";
+  } finally {
+    checkTunnel.disabled = false;
+  }
+});
 
 for (const button of document.querySelectorAll("[data-copy]")) {
   button.addEventListener("click", async () => {

@@ -175,6 +175,13 @@
         <p>Dirhaven installed, tunnel healthy and ChatGPT working are three separate states. Do not call it connected until a real tool call succeeds.</p>
       </div>
       <div class="setup-section-content">
+        <div class="tunnel-check" aria-label="Local tunnel discovery">
+          <p class="eyebrow">Passive / No credentials / No processes started</p>
+          <strong>What's installed locally?</strong>
+          <p>Check whether the official <code>tunnel-client</code> command is discoverable on this computer's PATH. This never checks your existing tunnel profile, keys, runtime processes or ChatGPT connection.</p>
+          <button type="button" class="copy" id="checkTunnel">Check local availability</button>
+          <p class="tunnel-status" id="tunnelStatus" role="status">Not checked. No tunnel diagnostics have been performed.</p>
+        </div>
         <ol class="checklist">
           <li class="checkline"><span class="check-number">01</span><div><strong>Create or reuse a private tunnel</strong><p>Use OpenAI Platform tunnel settings. Confirm the Platform organization, ChatGPT workspace and required Read/Use/Manage permissions.</p><a href="https://platform.openai.com/settings/organization/tunnels" target="_blank" rel="noopener noreferrer">Open tunnel settings ↗</a></div></li>
           <li class="checkline"><span class="check-number">02</span><div><strong>Configure the official tunnel client</strong><p>Point its local stdio command at this Dirhaven executable and the authorized scope. Keep keys in protected local secret storage, never in this wizard.</p><a href="https://developers.openai.com/api/docs/guides/secure-mcp-tunnels" target="_blank" rel="noopener noreferrer">Read OpenAI tunnel quickstart ↗</a></div></li>

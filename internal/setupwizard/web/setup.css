@@ -205,6 +205,12 @@ pre {
   font: 400 .8rem/1.65 var(--mono);
 }
 pre:focus-visible { outline-color: var(--yellow); }
+.tunnel-check { border: 1px solid var(--ink); padding: 20px; margin-bottom: 27px; }
+.tunnel-check .eyebrow { margin-bottom: 14px; }
+.tunnel-check strong { font: 500 1.3rem/1.2 var(--display); }
+.tunnel-check p:not(.eyebrow):not(.tunnel-status) { font: 400 .86rem/1.55 var(--body); }
+.tunnel-check code { font: .8rem var(--mono); }
+.tunnel-status { margin: 13px 0 0; color: #514c49; font: 400 .72rem/1.6 var(--mono); }
 .checklist { padding: 0; margin: -8px 0 0; list-style: none; }
 .checkline { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 14px; padding: 20px 0; border-bottom: 1px solid #c9c2bb; }
 .checkline:last-child { border: 0; }

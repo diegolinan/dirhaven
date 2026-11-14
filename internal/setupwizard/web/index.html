@@ -184,8 +184,8 @@
           <div class="chosen-tunnel">
             <label for="tunnelPath">Or specify a different tunnel-client executable</label>
             <input id="tunnelPath" type="text" spellcheck="false" autocomplete="off" placeholder="Absolute path to tunnel-client executable">
-            <button type="button" class="copy" id="checkChosenTunnel">Inspect selected file</button>
-            <p class="tunnel-status" id="chosenTunnelStatus" role="status">No file selected. This check reads filename and filesystem metadata only, never file contents.</p>
+            <div class="saved-actions"><button type="button" class="copy" id="browseTunnel">Choose executable</button><button type="button" class="copy" id="checkChosenTunnel">Inspect selected file</button><button type="button" class="copy" id="fingerprintTunnel">Calculate SHA-256</button></div>
+            <p class="tunnel-status" id="chosenTunnelStatus" role="status">No file selected. Metadata inspection does not read file contents. SHA-256 reads the selected file only when requested.</p><p class="tunnel-status" id="fingerprintStatus" role="status">Fingerprint not calculated. A hash is not proof of authenticity until compared with a trusted publisher checksum.</p>
           </div>
         </div>
         <ol class="checklist">

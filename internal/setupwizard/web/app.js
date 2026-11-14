@@ -28,6 +28,9 @@ const checkTunnel = document.getElementById("checkTunnel");
 const tunnelStatus = document.getElementById("tunnelStatus");
 const tunnelPath = document.getElementById("tunnelPath");
 const checkChosenTunnel = document.getElementById("checkChosenTunnel");
+const browseTunnel = document.getElementById("browseTunnel");
+const fingerprintTunnel = document.getElementById("fingerprintTunnel");
+const fingerprintStatus = document.getElementById("fingerprintStatus");
 const chosenTunnelStatus = document.getElementById("chosenTunnelStatus");
 let savedRevision = "";
 let savedChoice = null;
@@ -280,6 +283,65 @@ checkTunnel.addEventListener("click", async () => {
     tunnelStatus.textContent = cause.message || "Cannot check local executable availability.";
   } finally {
     checkTunnel.disabled = false;
+  }
+});
+
+browseTunnel.addEventListener("click", async () => {
+  if (!sessionToken) {
+    chosenTunnelStatus.textContent = "Setup authorization expired. Restart Dirhaven Setup.";
+    return;
+  }
+  browseTunnel.disabled = true;
+  chosenTunnelStatus.textContent = "Waiting for the desktop file chooser...";
+  try {
+    const response = await fetch("/api/pick-tunnel-file", {
+      method: "POST", mode: "same-origin", cache: "no-store",
+      headers: { "X-Dirhaven-Setup-Token": sessionToken }
+    });
+    if (!response.ok) throw new Error(response.status === 409
+      ? "Another file or folder chooser is already open."
+      : "Desktop chooser unavailable. Paste the absolute path instead.");
+    const data = await response.json();
+    if (data.cancelled) {
+      chosenTunnelStatus.textContent = "Selection cancelled. Nothing was inspected.";
+    } else if (data.ok && data.path) {
+      tunnelPath.value = data.path;
+      chosenTunnelStatus.textContent = "File selected. Click Inspect selected file to check metadata. No executable was run.";
+    } else {
+      chosenTunnelStatus.textContent = data.error || "Could not choose a file.";
+    }
+  } catch (cause) {
+    chosenTunnelStatus.textContent = cause.message || "File chooser unavailable.";
+  } finally {
+    browseTunnel.disabled = false;
+  }
+});
+
+tunnelPath.addEventListener("input", () => {
+  fingerprintStatus.textContent = "Fingerprint not calculated for this selection.";
+});
+fingerprintTunnel.addEventListener("click", async () => {
+  if (!sessionToken || !tunnelPath.value.trim()) {
+    fingerprintStatus.textContent = "Select an executable before calculating a fingerprint.";
+    return;
+  }
+  fingerprintTunnel.disabled = true;
+  fingerprintStatus.textContent = "Calculating SHA-256 of the explicitly chosen file locally...";
+  try {
+    const response = await fetch("/api/tunnel-fingerprint", {
+      method: "POST", mode: "same-origin", cache: "no-store",
+      headers: { "Content-Type": "application/json", "X-Dirhaven-Setup-Token": sessionToken },
+      body: JSON.stringify({ path: tunnelPath.value.trim() })
+    });
+    if (!response.ok) throw new Error("Fingerprint request failed.");
+    const data = await response.json();
+    fingerprintStatus.textContent = data.ok
+      ? "SHA-256: " + data.sha256 + ". Compare against a trusted publisher checksum. Authenticity: NOT VERIFIED."
+      : (data.error || "Fingerprint unavailable.") + " Authenticity: NOT VERIFIED.";
+  } catch (cause) {
+    fingerprintStatus.textContent = cause.message || "Fingerprint unavailable.";
+  } finally {
+    fingerprintTunnel.disabled = false;
   }
 });
 

@@ -46,12 +46,13 @@ type scopeResponse struct {
 }
 
 type wizard struct {
-	address       string
-	token         string
-	command       string
-	pickDirectory func(context.Context) (string, error)
-	pickerBusy    *atomic.Bool
-	store         *configstore.Store
+	address        string
+	token          string
+	command        string
+	pickDirectory  func(context.Context) (string, error)
+	pickTunnelFile func(context.Context) (string, error)
+	pickerBusy     *atomic.Bool
+	store          *configstore.Store
 }
 
 // Start opens a browser-based wizard on a random IPv4 loopback port.
@@ -76,11 +77,12 @@ func Start(ctx context.Context, output io.Writer) error {
 		return fmt.Errorf("locate Dirhaven executable: %w", err)
 	}
 	w := wizard{
-		address:       listener.Addr().String(),
-		token:         token,
-		command:       executable,
-		pickDirectory: chooseDirectory,
-		pickerBusy:    &atomic.Bool{},
+		address:        listener.Addr().String(),
+		token:          token,
+		command:        executable,
+		pickDirectory:  chooseDirectory,
+		pickTunnelFile: chooseTunnelExecutable,
+		pickerBusy:     &atomic.Bool{},
 	}
 	store, err := configstore.Default()
 	if err != nil {
@@ -176,6 +178,8 @@ func (w wizard) handler() http.Handler {
 	mux.HandleFunc("/api/revoke", w.handleRevoke)
 	mux.HandleFunc("/api/tunnel-diagnostic", w.handleTunnelDiagnostic)
 	mux.HandleFunc("/api/tunnel-selected", w.handleChosenTunnelDiagnostic)
+	mux.HandleFunc("/api/pick-tunnel-file", w.handlePickTunnelFile)
+	mux.HandleFunc("/api/tunnel-fingerprint", w.handleTunnelFingerprint)
 
 	return http.HandlerFunc(func(out http.ResponseWriter, req *http.Request) {
 		out.Header().Set("Cache-Control", "no-store")

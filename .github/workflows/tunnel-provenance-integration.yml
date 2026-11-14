@@ -1,0 +1,47 @@
+name: Public tunnel-client provenance integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tunnel-provenance-integration.yml'
+      - 'internal/setupwizard/provenance.go'
+      - 'internal/setupwizard/provenance_test.go'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-public-release:
+    name: Verify an official signed release and reject a forged source commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Check GitHub CLI
+        run: |
+          command -v gh
+          gh --version
+      - name: Download exact public release evidence (without installing or running tunnel-client)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/dirhaven-public-release"
+          gh release download v0.0.20 \
+            --repo openai/tunnel-client \
+            --pattern 'tunnel-client-v0.0.20-linux-amd64.zip' \
+            --pattern 'tunnel-client-v0.0.20-provenance.sigstore.json' \
+            --dir "$RUNNER_TEMP/dirhaven-public-release"
+      - name: Verify genuine signed provenance, then reject incorrect source commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DIRHAVEN_PROVENANCE_LIVE: '1'
+          DIRHAVEN_PROVENANCE_ARCHIVE: ${{ runner.temp }}/dirhaven-public-release/tunnel-client-v0.0.20-linux-amd64.zip
+          DIRHAVEN_PROVENANCE_BUNDLE: ${{ runner.temp }}/dirhaven-public-release/tunnel-client-v0.0.20-provenance.sigstore.json
+        run: |
+          go test -count=1 -run '^TestPublicSignedProvenanceIntegration$' -v ./internal/setupwizard

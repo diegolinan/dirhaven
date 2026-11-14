@@ -1,6 +1,7 @@
 // Package setupwizard provides a local-only configuration assistant.
-// It never starts a tunnel or accesses filesystem contents. Saving or revoking
-// per-user non-secret preferences requires an explicit user action.
+// It never starts a tunnel or scans authorized folders. User-initiated
+// integrity checks can read only explicitly selected release artifacts.
+// Saving or revoking non-secret preferences requires a separate explicit action.
 package setupwizard
 
 import (
@@ -181,6 +182,7 @@ func (w wizard) handler() http.Handler {
 	mux.HandleFunc("/api/pick-tunnel-file", w.handlePickTunnelFile)
 	mux.HandleFunc("/api/tunnel-fingerprint", w.handleTunnelFingerprint)
 	mux.HandleFunc("/api/tunnel-archive-verify", w.handleArchiveVerify)
+	mux.HandleFunc("/api/tunnel-provenance", w.handleProvenance)
 
 	return http.HandlerFunc(func(out http.ResponseWriter, req *http.Request) {
 		out.Header().Set("Cache-Control", "no-store")

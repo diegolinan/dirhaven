@@ -35,6 +35,10 @@ const archivePath = document.getElementById("archivePath");
 const manifestPath = document.getElementById("manifestPath");
 const verifyArchive = document.getElementById("verifyArchive");
 const archiveStatus = document.getElementById("archiveStatus");
+const bundlePath = document.getElementById("bundlePath");
+const sourceDigest = document.getElementById("sourceDigest");
+const verifyProvenance = document.getElementById("verifyProvenance");
+const provenanceStatus = document.getElementById("provenanceStatus");
 const chosenTunnelStatus = document.getElementById("chosenTunnelStatus");
 let savedRevision = "";
 let savedChoice = null;
@@ -380,6 +384,45 @@ verifyArchive.addEventListener("click", async () => {
     archiveStatus.textContent = cause.message || "Unable to compare selected files.";
   } finally {
     verifyArchive.disabled = false;
+  }
+});
+
+for (const field of [archivePath, bundlePath, sourceDigest]) {
+  field.addEventListener("input", () => {
+    provenanceStatus.textContent = "NOT VERIFIED for these selections.";
+  });
+}
+verifyProvenance.addEventListener("click", async () => {
+  if (!sessionToken || !archivePath.value.trim() || !bundlePath.value.trim()) {
+    provenanceStatus.textContent = "Select the release ZIP and its signed Sigstore bundle first.";
+    return;
+  }
+  verifyProvenance.disabled = true;
+  provenanceStatus.textContent = "Running GitHub CLI attestation verification. This may access Sigstore trust roots...";
+  try {
+    const response = await fetch("/api/tunnel-provenance", {
+      method: "POST", mode: "same-origin", cache: "no-store",
+      headers: { "Content-Type": "application/json", "X-Dirhaven-Setup-Token": sessionToken },
+      body: JSON.stringify({
+        archivePath: archivePath.value.trim(),
+        bundlePath: bundlePath.value.trim(),
+        sourceDigest: sourceDigest.value.trim()
+      })
+    });
+    if (!response.ok) throw new Error("Local provenance verification request failed.");
+    const data = await response.json();
+    if (!data.signatureVerified) {
+      provenanceStatus.textContent = (data.error || "Verification unsuccessful.") + " SIGNATURE NOT VERIFIED.";
+    } else {
+      provenanceStatus.textContent = "SIGNED PROVENANCE VERIFIED: " + data.identity +
+        ", release " + data.releaseTag +
+        (data.sourceDigestPinned ? ", exact source commit pinned." : ", exact source commit NOT pinned.") +
+        " Tunnel and ChatGPT connection: NOT CHECKED.";
+    }
+  } catch (cause) {
+    provenanceStatus.textContent = (cause.message || "Cannot verify signed provenance.") + " NOT VERIFIED.";
+  } finally {
+    verifyProvenance.disabled = false;
   }
 });
 

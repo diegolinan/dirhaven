@@ -196,6 +196,17 @@
             <input id="manifestPath" type="text" spellcheck="false" autocomplete="off" placeholder="Absolute path to SHA256SUMS.txt">
             <button type="button" class="copy" id="verifyArchive">Compare ZIP checksum</button>
             <p class="tunnel-status" id="archiveStatus" role="status">Not checked. A matching checksum confirms agreement with the selected manifest, not who published it.</p>
+            <div class="provenance-step">
+              <strong>Verify signed release provenance</strong>
+              <p>Requires a trusted GitHub CLI (<code>gh</code>) installed separately. Clicking Verify runs only <code>gh attestation verify</code> for your selected ZIP and bundle. It may download Sigstore trust-root data. It never runs tunnel-client or changes your tunnel.</p>
+              <label for="bundlePath">Signed provenance bundle - absolute path</label>
+              <input id="bundlePath" type="text" spellcheck="false" autocomplete="off" placeholder="Absolute path to tunnel-client-vX.Y.Z-provenance.sigstore.json">
+              <label for="sourceDigest">Expected release commit SHA (optional, recommended)</label>
+              <input id="sourceDigest" type="text" spellcheck="false" autocomplete="off" placeholder="40-character Git commit from the official release tag">
+              <button type="button" class="copy" id="verifyProvenance">Verify signed provenance</button>
+              <p class="tunnel-status" id="provenanceStatus" role="status">NOT VERIFIED. No external verifier has been invoked.</p>
+              <p class="footnote">Without a source commit SHA, only the signed repository, workflow and release tag are checked. A successful signature check is not a tunnel health check.</p>
+            </div>
             <p class="footnote"><a href="https://github.com/openai/tunnel-client/releases" target="_blank" rel="noopener noreferrer">Official tunnel-client releases ↗</a> · <a href="https://github.com/openai/tunnel-client#validate-a-downloaded-release" target="_blank" rel="noopener noreferrer">Signed provenance verification instructions ↗</a></p>
           </div>
         </div>

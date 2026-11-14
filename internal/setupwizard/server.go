@@ -1,5 +1,6 @@
-// Package setupwizard provides a local-only, nonpersistent configuration
-// assistant. It never starts a tunnel or accesses file contents.
+// Package setupwizard provides a local-only configuration assistant.
+// It never starts a tunnel or accesses filesystem contents. Saving or revoking
+// per-user non-secret preferences requires an explicit user action.
 package setupwizard
 
 import (
@@ -21,6 +22,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/diegolinan/dirhaven/internal/configstore"
 )
 
 //go:embed web/*
@@ -48,10 +51,12 @@ type wizard struct {
 	command       string
 	pickDirectory func(context.Context) (string, error)
 	pickerBusy    *atomic.Bool
+	store         *configstore.Store
 }
 
 // Start opens a browser-based wizard on a random IPv4 loopback port.
-// It never modifies the installed server, an existing tunnel, or user files.
+// It never modifies the installed server, an existing tunnel, or user data.
+// The optional saved-scope feature writes only to the per-user config directory.
 // A one-time token in the URL fragment authorizes API calls, and the fragment
 // is removed from browser history immediately after page startup.
 func Start(ctx context.Context, output io.Writer) error {
@@ -77,6 +82,11 @@ func Start(ctx context.Context, output io.Writer) error {
 		pickDirectory: chooseDirectory,
 		pickerBusy:    &atomic.Bool{},
 	}
+	store, err := configstore.Default()
+	if err != nil {
+		return err
+	}
+	w.store = &store
 	server := &http.Server{
 		Handler:           w.handler(),
 		ReadHeaderTimeout: 5 * time.Second,
@@ -87,7 +97,7 @@ func Start(ctx context.Context, output io.Writer) error {
 	go func() { done <- server.Serve(listener) }()
 	url := "http://" + w.address + "/#" + token
 	fmt.Fprintln(output, "Dirhaven Setup Wizard: "+url)
-	fmt.Fprintln(output, "This local-only assistant does not request API keys, create tunnels, or modify your files.")
+	fmt.Fprintln(output, "This local-only assistant does not request API keys or create tunnels. Optional saved preferences require a separate explicit action.")
 	fmt.Fprintln(output, "Press Ctrl+C to close setup.")
 	if err := openBrowser(url); err != nil {
 		fmt.Fprintln(output, "Browser did not open automatically. Open the private URL above manually.")
@@ -161,6 +171,9 @@ func (w wizard) handler() http.Handler {
 	}
 	mux.HandleFunc("/api/validate", w.handleValidate)
 	mux.HandleFunc("/api/pick-directory", w.handlePickDirectory)
+	mux.HandleFunc("/api/saved", w.handleSaved)
+	mux.HandleFunc("/api/save", w.handleSave)
+	mux.HandleFunc("/api/revoke", w.handleRevoke)
 
 	return http.HandlerFunc(func(out http.ResponseWriter, req *http.Request) {
 		out.Header().Set("Cache-Control", "no-store")

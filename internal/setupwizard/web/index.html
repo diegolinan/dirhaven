@@ -146,10 +146,19 @@
         <p>Validate the directories on this computer and prepare copyable configuration. This step neither installs software nor changes files.</p>
       </div>
       <div class="setup-section-content">
+        <div class="saved-pref" aria-label="Saved access preferences">
+          <div class="saved-pref-intro"><strong>Remember your choices.</strong><p>Optional, local to this OS user. Saving does not restart an MCP server or change a running connection.</p></div>
+          <div class="saved-actions">
+            <button type="button" id="loadSaved" class="copy" disabled>Load saved choices</button>
+            <button type="button" id="revokeSaved" class="copy" disabled>Forget saved choices</button>
+          </div>
+          <p class="saved-status" id="savedStatus" role="status">Checking this user's saved preferences...</p>
+        </div>
         <div class="actions"><button class="primary" id="generate" type="button">Validate &amp; prepare <span aria-hidden="true">↗</span></button><span class="badge-state" id="state">NOT VALIDATED</span></div>
         <div id="validationError" class="error hidden" role="alert"></div>
         <div id="results" class="results hidden">
           <div class="success-line">✓ Local directory scope validated. Your configuration is ready to copy.</div>
+          <div class="remember-actions"><button type="button" id="saveScope" class="copy">Save these choices locally</button><span>Only the selected paths and scope mode are stored. No credentials.</span></div>
           <div class="result-head"><strong>Run Dirhaven locally</strong><button type="button" class="copy" data-copy="command">Copy command</button></div>
           <pre id="command" tabindex="0"></pre>
           <div class="result-head"><strong>Example for a local stdio MCP client</strong><button type="button" class="copy" data-copy="client">Copy JSON</button></div>

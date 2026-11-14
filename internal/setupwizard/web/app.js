@@ -20,6 +20,13 @@ const error = document.getElementById("validationError");
 const results = document.getElementById("results");
 const command = document.getElementById("command");
 const client = document.getElementById("client");
+const loadSaved = document.getElementById("loadSaved");
+const revokeSaved = document.getElementById("revokeSaved");
+const saveScope = document.getElementById("saveScope");
+const savedStatus = document.getElementById("savedStatus");
+let savedRevision = "";
+let savedChoice = null;
+let validatedScope = null;
 
 function activeMode() {
   return document.querySelector('input[name="mode"]:checked').value;
@@ -47,12 +54,14 @@ function updatePlan() {
   advice.classList.toggle("warning", plan.value === "pro" || plan.value === "unknown" || role.value === "restricted");
 }
 function resetResult() {
+  validatedScope = null;
   stateBadge.textContent = "NOT VALIDATED";
   stateBadge.classList.remove("ready");
   error.classList.add("hidden");
   results.classList.add("hidden");
 }
 function showError(message) {
+  validatedScope = null;
   error.textContent = message;
   error.classList.remove("hidden");
   stateBadge.textContent = "CHECK REQUIRED";
@@ -152,6 +161,7 @@ generate.addEventListener("click", async () => {
     }
     command.textContent = data.command;
     client.textContent = data.mcpClientJSON;
+    validatedScope = { mode, paths: chosen, acknowledgeBroadAccess: mode === "all" && ack.checked };
     results.classList.remove("hidden");
     stateBadge.textContent = "LOCAL SCOPE READY";
     stateBadge.classList.add("ready");
@@ -162,6 +172,85 @@ generate.addEventListener("click", async () => {
     generate.disabled = false;
   }
 });
+
+async function refreshSavedPreferences() {
+  if (!sessionToken) {
+    savedStatus.textContent = "Saved preferences unavailable until setup is restarted.";
+    return;
+  }
+  try {
+    const response = await fetch("/api/saved", {
+      method: "GET", mode: "same-origin", cache: "no-store",
+      headers: { "X-Dirhaven-Setup-Token": sessionToken }
+    });
+    if (!response.ok) throw new Error("Saved configuration could not be read. Existing data was not changed.");
+    const saved = await response.json();
+    savedRevision = saved.revision || "";
+    savedChoice = saved.exists ? { mode: saved.mode, roots: saved.roots || [] } : null;
+    loadSaved.disabled = !saved.exists;
+    revokeSaved.disabled = !saved.exists;
+    savedStatus.textContent = saved.exists
+      ? "Saved locally: " + (saved.mode === "all" ? "broad access" : saved.roots.length + " selected folder(s)") + ". Nothing is applied automatically."
+      : "No saved choices yet. Saving is optional.";
+  } catch (cause) {
+    savedRevision = "";
+    savedChoice = null;
+    loadSaved.disabled = true;
+    revokeSaved.disabled = true;
+    savedStatus.textContent = cause.message || "Saved configuration unavailable.";
+  }
+}
+
+loadSaved.addEventListener("click", () => {
+  if (!savedChoice) return;
+  document.querySelector('input[name="mode"][value="' + savedChoice.mode + '"]').checked = true;
+  // Broad access is never reacknowledged based on a saved preference.
+  ack.checked = false;
+  paths.value = savedChoice.mode === "scoped" ? savedChoice.roots.join("\n") : "";
+  updateMode();
+  savedStatus.textContent = "Loaded into the form. Review and validate before using. Broad access needs fresh confirmation.";
+});
+
+saveScope.addEventListener("click", async () => {
+  if (!validatedScope) return;
+  saveScope.disabled = true;
+  try {
+    const response = await fetch("/api/save", {
+      method: "POST", mode: "same-origin", cache: "no-store",
+      headers: { "Content-Type": "application/json", "X-Dirhaven-Setup-Token": sessionToken },
+      body: JSON.stringify({ ...validatedScope, expectedRevision: savedRevision })
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error || "Could not save choices.");
+    await refreshSavedPreferences();
+    savedStatus.textContent = "Saved locally. This does not change an existing MCP process or tunnel.";
+  } catch (cause) {
+    savedStatus.textContent = cause.message || "Could not save choices.";
+  } finally {
+    saveScope.disabled = false;
+  }
+});
+
+revokeSaved.addEventListener("click", async () => {
+  if (!savedChoice || !savedRevision) return;
+  if (!window.confirm("Forget saved Dirhaven access choices? This does not stop or change a running MCP server.")) return;
+  revokeSaved.disabled = true;
+  try {
+    const response = await fetch("/api/revoke", {
+      method: "POST", mode: "same-origin", cache: "no-store",
+      headers: { "Content-Type": "application/json", "X-Dirhaven-Setup-Token": sessionToken },
+      body: JSON.stringify({ expectedRevision: savedRevision })
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error || "Could not forget choices.");
+    await refreshSavedPreferences();
+    savedStatus.textContent = "Saved choices forgotten. Running connections are unchanged.";
+  } catch (cause) {
+    savedStatus.textContent = cause.message || "Could not forget choices.";
+    revokeSaved.disabled = false;
+  }
+});
+void refreshSavedPreferences();
 
 for (const button of document.querySelectorAll("[data-copy]")) {
   button.addEventListener("click", async () => {

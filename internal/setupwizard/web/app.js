@@ -43,6 +43,13 @@ const chosenTunnelStatus = document.getElementById("chosenTunnelStatus");
 let savedRevision = "";
 let savedChoice = null;
 let validatedScope = null;
+let scopeRevision = 0;
+let savedLoaded = false;
+let savedReadError = false;
+function publishSetupState() {
+  window.dispatchEvent(new CustomEvent("dirhaven:state", { detail: { saved: savedChoice, scope: validatedScope, savedLoaded, savedReadError, savedMessage: savedStatus.textContent, busy: generate.disabled, sessionActive: Boolean(sessionToken) } }));
+}
+window.addEventListener("dirhaven:request-state", publishSetupState);
 
 function activeMode() {
   return document.querySelector('input[name="mode"]:checked').value;
@@ -70,11 +77,13 @@ function updatePlan() {
   advice.classList.toggle("warning", plan.value === "pro" || plan.value === "unknown" || role.value === "restricted");
 }
 function resetResult() {
+  scopeRevision++;
   validatedScope = null;
   stateBadge.textContent = "NOT VALIDATED";
   stateBadge.classList.remove("ready");
   error.classList.add("hidden");
   results.classList.add("hidden");
+  publishSetupState();
 }
 function showError(message) {
   validatedScope = null;
@@ -83,6 +92,7 @@ function showError(message) {
   stateBadge.textContent = "CHECK REQUIRED";
   stateBadge.classList.remove("ready");
   results.classList.add("hidden");
+  publishSetupState();
 }
 for (const radio of document.querySelectorAll('input[name="mode"]')) {
   radio.addEventListener("change", updateMode);
@@ -104,7 +114,7 @@ pickDirectory.addEventListener("click", async () => {
   try {
     const response = await fetch("/api/pick-directory", {
       method: "POST",
-      mode: "same-origin",
+      mode: "same-origin", referrerPolicy: "same-origin",
       cache: "no-store",
       headers: { "X-Dirhaven-Setup-Token": sessionToken }
     });
@@ -139,6 +149,7 @@ generate.addEventListener("click", async () => {
     showError("This setup session has expired. Close this tab and start 'dirhaven setup' again.");
     return;
   }
+  const revision = scopeRevision;
   const mode = activeMode();
   const chosen = mode === "scoped"
     ? paths.value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean)
@@ -148,12 +159,13 @@ generate.addEventListener("click", async () => {
     return;
   }
   generate.disabled = true;
+  publishSetupState();
   stateBadge.textContent = "CHECKING LOCALLY...";
   error.classList.add("hidden");
   try {
     const response = await fetch("/api/validate", {
       method: "POST",
-      mode: "same-origin",
+      mode: "same-origin", referrerPolicy: "same-origin",
       cache: "no-store",
       headers: {
         "Content-Type": "application/json",
@@ -171,32 +183,37 @@ generate.addEventListener("click", async () => {
         : "The local validation request failed (" + response.status + ").");
     }
     const data = await response.json();
+    if (revision !== scopeRevision) return;
     if (!data.ok) {
       showError(data.error || "Your selected scope could not be validated.");
       return;
     }
     command.textContent = data.command;
     client.textContent = data.mcpClientJSON;
-    validatedScope = { mode, paths: chosen, acknowledgeBroadAccess: mode === "all" && ack.checked };
+    validatedScope = { mode, paths: data.roots || chosen, acknowledgeBroadAccess: mode === "all" && ack.checked };
     results.classList.remove("hidden");
     stateBadge.textContent = "LOCAL SCOPE READY";
     stateBadge.classList.add("ready");
-    results.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    results.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
   } catch (reason) {
-    showError(reason.message || "Unable to communicate with the local setup process.");
+    if (revision === scopeRevision) showError(reason.message || "Unable to communicate with the local setup process.");
   } finally {
     generate.disabled = false;
+    publishSetupState();
   }
 });
 
 async function refreshSavedPreferences() {
   if (!sessionToken) {
     savedStatus.textContent = "Saved preferences unavailable until setup is restarted.";
+    savedLoaded = true;
+    publishSetupState();
     return;
   }
+  savedReadError = false;
   try {
     const response = await fetch("/api/saved", {
-      method: "GET", mode: "same-origin", cache: "no-store",
+      method: "GET", mode: "same-origin", referrerPolicy: "same-origin", cache: "no-store",
       headers: { "X-Dirhaven-Setup-Token": sessionToken }
     });
     if (!response.ok) throw new Error("Saved configuration could not be read. Existing data was not changed.");
@@ -209,11 +226,15 @@ async function refreshSavedPreferences() {
       ? "Saved locally: " + (saved.mode === "all" ? "broad access" : saved.roots.length + " selected folder(s)") + ". Nothing is applied automatically."
       : "No saved choices yet. Saving is optional.";
   } catch (cause) {
+    savedReadError = true;
     savedRevision = "";
     savedChoice = null;
     loadSaved.disabled = true;
     revokeSaved.disabled = true;
     savedStatus.textContent = cause.message || "Saved configuration unavailable.";
+  } finally {
+    savedLoaded = true;
+    publishSetupState();
   }
 }
 
@@ -225,6 +246,7 @@ loadSaved.addEventListener("click", () => {
   paths.value = savedChoice.mode === "scoped" ? savedChoice.roots.join("\n") : "";
   updateMode();
   savedStatus.textContent = "Loaded into the form. Review and validate before using. Broad access needs fresh confirmation.";
+  publishSetupState();
 });
 
 saveScope.addEventListener("click", async () => {
@@ -232,7 +254,7 @@ saveScope.addEventListener("click", async () => {
   saveScope.disabled = true;
   try {
     const response = await fetch("/api/save", {
-      method: "POST", mode: "same-origin", cache: "no-store",
+      method: "POST", mode: "same-origin", referrerPolicy: "same-origin", cache: "no-store",
       headers: { "Content-Type": "application/json", "X-Dirhaven-Setup-Token": sessionToken },
       body: JSON.stringify({ ...validatedScope, expectedRevision: savedRevision })
     });
@@ -244,6 +266,7 @@ saveScope.addEventListener("click", async () => {
     savedStatus.textContent = cause.message || "Could not save choices.";
   } finally {
     saveScope.disabled = false;
+    publishSetupState();
   }
 });
 
@@ -253,7 +276,7 @@ revokeSaved.addEventListener("click", async () => {
   revokeSaved.disabled = true;
   try {
     const response = await fetch("/api/revoke", {
-      method: "POST", mode: "same-origin", cache: "no-store",
+      method: "POST", mode: "same-origin", referrerPolicy: "same-origin", cache: "no-store",
       headers: { "Content-Type": "application/json", "X-Dirhaven-Setup-Token": sessionToken },
       body: JSON.stringify({ expectedRevision: savedRevision })
     });
@@ -264,6 +287,8 @@ revokeSaved.addEventListener("click", async () => {
   } catch (cause) {
     savedStatus.textContent = cause.message || "Could not forget choices.";
     revokeSaved.disabled = false;
+  } finally {
+    publishSetupState();
   }
 });
 void refreshSavedPreferences();
@@ -277,7 +302,7 @@ checkTunnel.addEventListener("click", async () => {
   tunnelStatus.textContent = "Checking only for the tunnel-client command on PATH...";
   try {
     const response = await fetch("/api/tunnel-diagnostic", {
-      method: "GET", mode: "same-origin", cache: "no-store",
+      method: "GET", mode: "same-origin", referrerPolicy: "same-origin", cache: "no-store",
       headers: { "X-Dirhaven-Setup-Token": sessionToken }
     });
     if (!response.ok) throw new Error("Local discovery request failed.");
@@ -303,7 +328,7 @@ browseTunnel.addEventListener("click", async () => {
   chosenTunnelStatus.textContent = "Waiting for the desktop file chooser...";
   try {
     const response = await fetch("/api/pick-tunnel-file", {
-      method: "POST", mode: "same-origin", cache: "no-store",
+      method: "POST", mode: "same-origin", referrerPolicy: "same-origin", cache: "no-store",
       headers: { "X-Dirhaven-Setup-Token": sessionToken }
     });
     if (!response.ok) throw new Error(response.status === 409
@@ -314,6 +339,7 @@ browseTunnel.addEventListener("click", async () => {
       chosenTunnelStatus.textContent = "Selection cancelled. Nothing was inspected.";
     } else if (data.ok && data.path) {
       tunnelPath.value = data.path;
+      invalidateTunnelSelection();
       chosenTunnelStatus.textContent = "File selected. Click Inspect selected file to check metadata. No executable was run.";
     } else {
       chosenTunnelStatus.textContent = data.error || "Could not choose a file.";
@@ -325,9 +351,13 @@ browseTunnel.addEventListener("click", async () => {
   }
 });
 
-tunnelPath.addEventListener("input", () => {
+let tunnelRevision = 0;
+function invalidateTunnelSelection() {
+  tunnelRevision++;
+  chosenTunnelStatus.textContent = "Selection changed. File metadata has not been inspected.";
   fingerprintStatus.textContent = "Fingerprint not calculated for this selection.";
-});
+}
+tunnelPath.addEventListener("input", invalidateTunnelSelection);
 fingerprintTunnel.addEventListener("click", async () => {
   if (!sessionToken || !tunnelPath.value.trim()) {
     fingerprintStatus.textContent = "Select an executable before calculating a fingerprint.";
@@ -335,26 +365,31 @@ fingerprintTunnel.addEventListener("click", async () => {
   }
   fingerprintTunnel.disabled = true;
   fingerprintStatus.textContent = "Calculating SHA-256 of the explicitly chosen file locally...";
+  const revision = tunnelRevision;
   try {
     const response = await fetch("/api/tunnel-fingerprint", {
-      method: "POST", mode: "same-origin", cache: "no-store",
+      method: "POST", mode: "same-origin", referrerPolicy: "same-origin", cache: "no-store",
       headers: { "Content-Type": "application/json", "X-Dirhaven-Setup-Token": sessionToken },
       body: JSON.stringify({ path: tunnelPath.value.trim() })
     });
     if (!response.ok) throw new Error("Fingerprint request failed.");
     const data = await response.json();
+    if (revision !== tunnelRevision) return;
     fingerprintStatus.textContent = data.ok
       ? "SHA-256: " + data.sha256 + ". Compare against a trusted publisher checksum. Authenticity: NOT VERIFIED."
       : (data.error || "Fingerprint unavailable.") + " Authenticity: NOT VERIFIED.";
   } catch (cause) {
+    if (revision !== tunnelRevision) return;
     fingerprintStatus.textContent = cause.message || "Fingerprint unavailable.";
   } finally {
     fingerprintTunnel.disabled = false;
   }
 });
 
+let archiveRevision = 0;
 for (const field of [archivePath, manifestPath]) {
   field.addEventListener("input", () => {
+    archiveRevision++;
     archiveStatus.textContent = "Not checked for these selections.";
   });
 }
@@ -365,14 +400,16 @@ verifyArchive.addEventListener("click", async () => {
   }
   verifyArchive.disabled = true;
   archiveStatus.textContent = "Comparing selected release ZIP with selected checksum manifest locally...";
+  const revision = archiveRevision;
   try {
     const response = await fetch("/api/tunnel-archive-verify", {
-      method: "POST", mode: "same-origin", cache: "no-store",
+      method: "POST", mode: "same-origin", referrerPolicy: "same-origin", cache: "no-store",
       headers: { "Content-Type": "application/json", "X-Dirhaven-Setup-Token": sessionToken },
       body: JSON.stringify({ archivePath: archivePath.value.trim(), manifestPath: manifestPath.value.trim() })
     });
     if (!response.ok) throw new Error("Local ZIP checksum comparison request failed.");
     const data = await response.json();
+    if (revision !== archiveRevision) return;
     if (data.error) {
       archiveStatus.textContent = data.error + " Origin: NOT VERIFIED.";
     } else if (data.matches) {
@@ -381,14 +418,17 @@ verifyArchive.addEventListener("click", async () => {
       archiveStatus.textContent = "CHECKSUM MISMATCH: the selected ZIP does not match the manifest. Do not install it. Origin: NOT VERIFIED.";
     }
   } catch (cause) {
+    if (revision !== archiveRevision) return;
     archiveStatus.textContent = cause.message || "Unable to compare selected files.";
   } finally {
     verifyArchive.disabled = false;
   }
 });
 
+let provenanceRevision = 0;
 for (const field of [archivePath, bundlePath, sourceDigest]) {
   field.addEventListener("input", () => {
+    provenanceRevision++;
     provenanceStatus.textContent = "NOT VERIFIED for these selections.";
   });
 }
@@ -399,9 +439,10 @@ verifyProvenance.addEventListener("click", async () => {
   }
   verifyProvenance.disabled = true;
   provenanceStatus.textContent = "Running GitHub CLI attestation verification. This may access Sigstore trust roots...";
+  const revision = provenanceRevision;
   try {
     const response = await fetch("/api/tunnel-provenance", {
-      method: "POST", mode: "same-origin", cache: "no-store",
+      method: "POST", mode: "same-origin", referrerPolicy: "same-origin", cache: "no-store",
       headers: { "Content-Type": "application/json", "X-Dirhaven-Setup-Token": sessionToken },
       body: JSON.stringify({
         archivePath: archivePath.value.trim(),
@@ -411,6 +452,7 @@ verifyProvenance.addEventListener("click", async () => {
     });
     if (!response.ok) throw new Error("Local provenance verification request failed.");
     const data = await response.json();
+    if (revision !== provenanceRevision) return;
     if (!data.signatureVerified) {
       provenanceStatus.textContent = (data.error || "Verification unsuccessful.") + " SIGNATURE NOT VERIFIED.";
     } else {
@@ -420,6 +462,7 @@ verifyProvenance.addEventListener("click", async () => {
         " Tunnel and ChatGPT connection: NOT CHECKED.";
     }
   } catch (cause) {
+    if (revision !== provenanceRevision) return;
     provenanceStatus.textContent = (cause.message || "Cannot verify signed provenance.") + " NOT VERIFIED.";
   } finally {
     verifyProvenance.disabled = false;
@@ -438,19 +481,22 @@ checkChosenTunnel.addEventListener("click", async () => {
   }
   checkChosenTunnel.disabled = true;
   chosenTunnelStatus.textContent = "Inspecting only the chosen file's metadata...";
+  const revision = tunnelRevision;
   try {
     const response = await fetch("/api/tunnel-selected", {
-      method: "POST", mode: "same-origin", cache: "no-store",
+      method: "POST", mode: "same-origin", referrerPolicy: "same-origin", cache: "no-store",
       headers: { "Content-Type": "application/json", "X-Dirhaven-Setup-Token": sessionToken },
       body: JSON.stringify({ path: chosen })
     });
     if (!response.ok) throw new Error("Selected file inspection request failed.");
     const data = await response.json();
+    if (revision !== tunnelRevision) return;
     chosenTunnelStatus.textContent = (data.executableName
       ? "Candidate found: " + data.executableName + ". "
       : "Candidate not confirmed. ") +
       (data.nextStep || "") + " Connection status: NOT CHECKED.";
   } catch (cause) {
+    if (revision !== tunnelRevision) return;
     chosenTunnelStatus.textContent = cause.message || "Cannot inspect the chosen file.";
   } finally {
     checkChosenTunnel.disabled = false;
@@ -464,40 +510,11 @@ for (const button of document.querySelectorAll("[data-copy]")) {
       await navigator.clipboard.writeText(source.textContent);
       const previous = button.textContent;
       button.textContent = "Copied ✓";
-      button.blur();
+
       setTimeout(() => { button.textContent = previous; }, 1700);
     } catch {
       source.focus();
       button.textContent = "Select and copy manually";
     }
   });
-}
-
-/* Navigation follows the actual Work page's editorial section links. */
-const chapterLinks = Array.from(document.querySelectorAll(".work-sections a"));
-const chapters = chapterLinks.map((link) => document.querySelector(link.getAttribute("href"))).filter(Boolean);
-function activateChapter(id) {
-  for (const link of chapterLinks) {
-    const active = link.getAttribute("href") === "#" + id;
-    link.classList.toggle("active", active);
-    if (active) {
-      link.setAttribute("aria-current", "location");
-    } else {
-      link.removeAttribute("aria-current");
-    }
-  }
-}
-for (const link of chapterLinks) {
-  link.addEventListener("click", () => activateChapter(link.hash.slice(1)));
-}
-if ("IntersectionObserver" in window) {
-  const chapterObserver = new IntersectionObserver(
-    (entries) => {
-      const visible = entries.filter((entry) => entry.isIntersecting)
-        .sort((left, right) => left.boundingClientRect.top - right.boundingClientRect.top);
-      if (visible.length > 0) activateChapter(visible[0].target.id);
-    },
-    { rootMargin: "-10% 0px -60% 0px" }
-  );
-  for (const chapter of chapters) chapterObserver.observe(chapter);
 }

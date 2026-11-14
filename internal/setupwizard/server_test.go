@@ -50,11 +50,11 @@ func TestWizardBoundToHostAndRequiresToken(t *testing.T) {
 		t.Fatal("secret leaked into static HTML")
 	}
 	if !strings.Contains(resp.Body.String(), "/foundation.css") ||
-		!strings.Contains(resp.Body.String(), "/work.css") ||
+		!strings.Contains(resp.Body.String(), "/setup-view.js") ||
 		!strings.Contains(resp.Body.String(), "/setup.css") {
-		t.Fatal("page must load the original Work design system and setup adapter")
+		t.Fatal("page must load the shared foundation and guided setup assets")
 	}
-	for _, asset := range []string{"/app.js", "/foundation.css", "/work.css", "/setup.css", "/dirhaven-mark.svg"} {
+	for _, asset := range []string{"/app.js", "/foundation.css", "/work.css", "/setup.css", "/dirhaven-mark.svg", "/setup-view.js", "/assets/dirhaven-symbol.webp", "/assets/setup-connection.webp", "/assets/setup-inspect.webp"} {
 		r := requestWizard(t, w, http.MethodGet, asset, "", "", nil)
 		if r.Code != http.StatusOK || len(r.Body.Bytes()) == 0 {
 			t.Fatalf("missing static asset %s: %d", asset, r.Code)

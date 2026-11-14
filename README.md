@@ -78,7 +78,7 @@ The development branch includes a local browser-based setup assistant. After bui
 dirhaven setup
 ```
 
-The wizard checks user-selected directory roots, requires explicit confirmation for broad access and prepares a local command and generic stdio MCP configuration example. It links to current OpenAI guidance for configuring an independently owned Secure MCP Tunnel and ChatGPT connection. **This is not yet a native installer:** it does not register services, install tunnel software, capture credentials or create ChatGPT plugins. The setup page is served only on `127.0.0.1` for the life of the command; press Ctrl+C to close it. See [v0.2.0 Setup Wizard scope](docs/SETUP_WIZARD_v0.2.0.md).
+The guided interface has three stages: select folders, prepare a connection and try an operation in your MCP client. Returning sessions offer a saved-selection overview; loading never validates or applies that selection automatically. The wizard checks user-selected directory roots, requires explicit confirmation for broad access and prepares a local command and generic stdio MCP configuration example. It links to current OpenAI guidance for configuring an independently owned Secure MCP Tunnel and ChatGPT connection. **This is not yet a native installer:** it does not register services, install tunnel software, capture credentials or create ChatGPT plugins. The setup page is served only on `127.0.0.1` for the life of the command; press Ctrl+C to close it. See [v0.2.0 Setup Wizard scope](docs/SETUP_WIZARD_v0.2.0.md).
 
 ### Run
 

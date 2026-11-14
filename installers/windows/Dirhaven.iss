@@ -56,7 +56,7 @@ Source: "..\..\third_party\README.md"; DestDir: "{app}\third_party"; Flags: igno
 Source: "..\..\third_party\licenses\*"; DestDir: "{app}\third_party\licenses"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\Dirhaven Setup"; Filename: "{app}\{#AppExe}"; Parameters: "setup"; WorkingDir: "{app}"; IconFilename: "{app}\dirhaven.ico"
+Name: "{group}\Dirhaven Setup"; Filename: "{app}\{#AppExe}"; Parameters: "setup"; WorkingDir: "{app}"; IconFilename: "{app}\dirhaven.ico"
 Name: "{autodesktop}\Dirhaven Setup"; Filename: "{app}\{#AppExe}"; Parameters: "setup"; WorkingDir: "{app}"; IconFilename: "{app}\dirhaven.ico"; Tasks: desktopicon
 
 [Run]

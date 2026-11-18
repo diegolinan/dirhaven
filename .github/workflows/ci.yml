@@ -33,3 +33,24 @@ jobs:
         run: go vet ./...
       - name: Build standalone CLI
         run: go build ./cmd/dirhaven
+
+      - name: Install Node for frontend checks (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install browser development dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: npm ci --ignore-scripts
+      - name: Check frontend JavaScript (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          node --check internal/setupwizard/web/app.js
+          node --check internal/setupwizard/web/setup-view.js
+      - name: Install test browser (Linux)
+        if: runner.os == 'Linux'
+        run: npx playwright install --with-deps chromium
+      - name: Run guided setup UI regressions (Linux)
+        if: runner.os == 'Linux'
+        run: npm run test:ui -- --project=desktop --project=mobile

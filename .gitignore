@@ -26,3 +26,8 @@ coverage.out
 # Proprietary fonts supplied locally by the owner for private previews.
 # Never commit font binaries to this public Apache-2.0 repository.
 /internal/setupwizard/web/assets/*.woff2
+
+# Browser development checks
+/node_modules/
+/test-results/
+/playwright-report/

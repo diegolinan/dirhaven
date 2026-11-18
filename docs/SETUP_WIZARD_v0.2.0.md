@@ -16,17 +16,23 @@ The intended experience is:
 
 Users on plans without full ChatGPT Web MCP capability must still be able to use Dirhaven with another compatible local stdio MCP client.
 
-## Visual identity (direct Work page reuse)
+## Guided setup interface
 
-The setup page is now built on the **actual** `diegolinan.me/work/` structure: original `.work-frame`, `.work-header`, `.work-intro`, `.work-sections`, `.work-list`, `.work-entry`, and `.work-footer` markup conventions. These files were copied **verbatim** from the owner's local personal-site repository:
-- `internal/setupwizard/web/foundation.css` - original `D:/Projects/diegolinan.me/foundation.css`
-- `internal/setupwizard/web/work.css` - original `D:/Projects/diegolinan.me/pages/work-index/work.css`
+The setup uses Dirhaven's approved bookends symbol and the owner's paper/ink/pink/turquoise/yellow visual identity. It is an application interface, rather than a copy of the portfolio's Work index.
 
-The new `setup.css` contains only functional adaptations needed for forms, steps and responsive layout. It is **not** a separate reconstruction of the owner's visual system. The approved layered-folder/doorway logo concept is represented by a scalable SVG interpretation.
+- Three stages: choose folders, prepare a connection, try an operation in the connected client.
+- Separate ChatGPT and generic local stdio routes, with existing/new tunnel guidance.
+- Returning sessions show saved choices for explicit review. Loading never validates or applies them automatically; broad access needs a fresh acknowledgement.
+- Saving and forgetting remain explicit actions. Forgetting saved preferences does not revoke a running connection's filesystem access.
+- Tunnel metadata, fingerprints, ZIP checksums and signed provenance remain available on demand, with their original limitations and independent results.
+- `app.js` owns the existing API calls. `setup-view.js` consumes presentation events and manages navigation; navigation itself makes no protected API calls.
+- Replies for an older folder/file selection cannot validate a newer selection. Local API fetches explicitly use same-origin referrer policy so Firefox supplies a same-origin Origin header; strict server token/host/Origin validation is unchanged.
+
+The new raster illustrations and their prompts/hashes are documented in `SETUP-ART-2026-11-14.json`. Artwork is separately reserved under `assets/BRANDING.md`.
 
 The owner authorized using the purchased Die Grotesk family. For local preview only, the three original `.woff2` binaries are copied from the personal website into `internal/setupwizard/web/assets/` and embedded in the development binary. Browser checks confirmed HTTP 200 and loaded font faces for `Die Grotesk`, `Die Grotesk Reading` and `Space Mono`. **The binaries are gitignored and are not included in the public Apache-2.0 source tree.** Public builds currently fall back to system fonts; before shipping a publicly downloadable executable with embedded font files, verify that the owner's license includes the required application embedding and distribution scope.
 
-The direct page reuse changes frontend assets, their static routes and in-page navigation only; root validation, deliberate `--allow-all` acknowledgment, sensitive credentials and MCP semantics are unchanged. Local Chromium checks cover 1440, 1024, 768, 390 and 320 CSS-pixel widths with original fonts loaded and tested UI interactions. Native Go tests validate the local HTTP static assets and authorization boundary.
+The guided redesign changes frontend assets, static asset routes and navigation. Root validation, deliberate broad-access acknowledgment, credentials and MCP semantics remain with the existing APIs. Browser regressions cover 320–1440 px, zoom, reduced motion, forced colors and keyboard focus. Native Go tests cover the local HTTP authorization boundary. See `SETUP-UI-REVIEW-2026-11-14.md` for the reviewed scope and evidence.
 
 ## First working slice (this branch)
 

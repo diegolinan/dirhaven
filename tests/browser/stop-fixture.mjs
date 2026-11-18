@@ -1,0 +1,1 @@
+export default async function(){try{await fetch('http://127.0.0.1:4189/__fixture/stop',{method:'POST'});}catch{}}

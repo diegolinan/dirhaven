@@ -1,0 +1,36 @@
+{
+  "copyright": "2026 Diego Liñan. Artwork remains separately reserved; not Apache-2.0.",
+  "mode": "built-in image_gen",
+  "prompts": [
+    {
+      "id": "connection",
+      "prompt": "Create one standalone transparent-background editorial illustration for the Dirhaven local filesystem setup assistant. A compact isolated analog object group, no scene or banner, no text or letters. Bold vintage engraved black ink and warm bone-paper objects, selective crosshatching and halftone, slightly imperfect print texture, contemporary tattoo-flash strength. Precise palette ink #161515, warm paper #FBF8F5, pink #F17192, turquoise #00C7D1, small yellow #FDEA55 accents. Match a brand symbol of pink/turquoise file folders between two black engraved bookends. Simple strong silhouette readable at 140px, generous clear padding, no border, true transparent background and clean alpha. Not glossy 3D, no robot, brain, cloud, shield, lock, neon, circuit board or SVG-style thin lines. This is a calm infrastructure tool, not a marketing poster. Two short chunky analog patch connectors are held in alignment on a slight diagonal: a turquoise cable plug on the left and a pink socket on the right, with a tiny narrow visible gap between them. Their cream/black engraved bodies feel tactile and mechanically precise. Both short cables curve inward to form one balanced compact group; no dangling long wires. A tiny yellow contact is visible in the plug. Connection is being prepared, not magically certified. No human hands, no sparks, no arrows.",
+      "mode": "built-in image_gen"
+    },
+    {
+      "id": "inspect",
+      "prompt": "Create one standalone transparent-background editorial illustration for the Dirhaven local filesystem setup assistant. A compact isolated analog object group, no scene or banner, no text or letters. Bold vintage engraved black ink and warm bone-paper objects, selective crosshatching and halftone, slightly imperfect print texture, contemporary tattoo-flash strength. Precise palette ink #161515, warm paper #FBF8F5, pink #F17192, turquoise #00C7D1, small yellow #FDEA55 accents. Match a brand symbol of pink/turquoise file folders between two black engraved bookends. Simple strong silhouette readable at 140px, generous clear padding, no border, true transparent background and clean alpha. Not glossy 3D, no robot, brain, cloud, shield, lock, neon, circuit board or SVG-style thin lines. This is a calm infrastructure tool, not a marketing poster. A single warm-paper file sheet resting upright in a low turquoise document tray, with one engraved black magnifying glass angled over the sheet. Through its lens, three abstract pink ink strokes are enlarged and visibly unchanged. A small pink tab on the sheet and tiny yellow brass rivet on the magnifier handle. Unified compact silhouette. No actual words, letters, tick marks, check badges or success stamps. Meaning is inspecting evidence, not declaring success.",
+      "mode": "built-in image_gen"
+    }
+  ],
+  "exports": [
+    {
+      "id": "dirhaven-symbol",
+      "originalSHA256": "03c270239faa716ac1e0035d69050cbf1d7610d83a12454086d1c68b3fe2c172",
+      "webpSHA256": "9e8475e02d5c47ea35f7adb7ae85f7ee649df8319b26f5115b5cf630ca680759",
+      "bytes": 82642
+    },
+    {
+      "id": "setup-connection",
+      "originalSHA256": "98f18580bc2a88ad21ff657e90f7defbca0547a3bd1239d37d17467c659e6409",
+      "webpSHA256": "d6b82d0ee11ce1e54a9e5b1f7ddc5affe3f08b359b70e6f72b4f113af07aa109",
+      "bytes": 76530
+    },
+    {
+      "id": "setup-inspect",
+      "originalSHA256": "65f1a17ab1d9e7a53e66c78cf8fd97b53837ffb6d44892660b9e14d8700e0905",
+      "webpSHA256": "684c9aedf0d42c809d4337a29026a40c9aea4aa181d7b8e61eced8f5bad076ed",
+      "bytes": 66686
+    }
+  ]
+}

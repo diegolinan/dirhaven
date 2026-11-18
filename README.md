@@ -1,6 +1,6 @@
 # Dirhaven
 
-![Dirhaven - Your files. Your boundaries.](assets/dirhaven-banner-1280x640-v1.jpg)
+![Dirhaven - Your files. Your boundaries.](assets/dirhaven-banner-1280x640-v3.jpg)
 
 **Your files. Your boundaries.**
 
